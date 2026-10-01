@@ -67,6 +67,7 @@ pnpm lint         # ESLint en todos los paquetes
 pnpm typecheck    # tsc --noEmit en todos los paquetes
 pnpm test         # Vitest (unidades: heurística, prompts, créditos, proveedores)
 pnpm backtest     # niveles 1 y 2 del backtesting, reporte en backtesting/reports/
+pnpm --filter @callpilot/web e2e   # Playwright contra web:3000 y realtime:4001 ya levantados
 ```
 
 ## Backtesting

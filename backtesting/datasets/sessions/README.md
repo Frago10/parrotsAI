@@ -9,11 +9,11 @@ con la verdad de referencia.
 
 ## Archivos incluidos
 
-| Archivo | Contenido |
-|---|---|
-| `demo-ventas.jsonl` | Llamada de ventas sintética en español (20 segmentos, objeciones, aclaración, respuesta forzada, feedback). |
-| `demo-ventas.labels.json` | Etiquetas humanas `{ segmentId: needsAnswer }` para esa sesión. |
-| `demo-entrevista.jsonl` | Entrevista sintética en inglés (22 segmentos, behavioral, technical, coding). Sin etiquetas: la referencia sale de los eventos `question.heuristic`. |
+| Archivo                   | Contenido                                                                                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `demo-ventas.jsonl`       | Llamada de ventas sintética en español (20 segmentos, objeciones, aclaración, respuesta forzada, feedback).                                          |
+| `demo-ventas.labels.json` | Etiquetas humanas `{ segmentId: needsAnswer }` para esa sesión.                                                                                      |
+| `demo-entrevista.jsonl`   | Entrevista sintética en inglés (22 segmentos, behavioral, technical, coding). Sin etiquetas: la referencia sale de los eventos `question.heuristic`. |
 
 ## Verdad de referencia
 

@@ -47,7 +47,9 @@ describe('nivel 2', () => {
   });
 
   it('funciona sin clasificador LLM', async () => {
-    const r = await replaySession(path.join(SESSIONS_DIR, 'demo-entrevista.jsonl'), { useLlm: false });
+    const r = await replaySession(path.join(SESSIONS_DIR, 'demo-entrevista.jsonl'), {
+      useLlm: false,
+    });
     expect(r.detections.every((d) => d.source === 'heuristic')).toBe(true);
     expect(r.detectedNeedsAnswer).toBeGreaterThan(0);
   });

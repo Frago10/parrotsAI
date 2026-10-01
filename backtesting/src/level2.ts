@@ -68,7 +68,11 @@ export interface Level2Result {
   parsed: number;
   invalidLines: number[];
   themSegments: number;
-  groundTruth: { source: 'labels' | 'heuristic' | 'labels+heuristic'; positives: number; labeled: number };
+  groundTruth: {
+    source: 'labels' | 'heuristic' | 'labels+heuristic';
+    positives: number;
+    labeled: number;
+  };
   detections: ReplayDetection[];
   detectedNeedsAnswer: number;
   metrics: BinaryMetrics;
@@ -158,7 +162,8 @@ export function parseSessionFile(file: string): ParsedSession {
 }
 
 const LabelsFileSchema = (raw: unknown): Record<string, boolean> => {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('labels.json debe ser un objeto { segmentId: boolean }');
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    throw new Error('labels.json debe ser un objeto { segmentId: boolean }');
   const out: Record<string, boolean> = {};
   for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
     if (typeof v !== 'boolean') throw new Error(`labels.json: el valor de ${k} debe ser boolean`);
@@ -188,12 +193,18 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
 
   // ---------- Verdad de referencia ----------
   const heuristicByText = new Map<string, boolean>();
-  for (const ev of events) if (ev.ev === 'question.heuristic') heuristicByText.set(ev.text, ev.needsAnswer);
+  for (const ev of events)
+    if (ev.ev === 'question.heuristic') heuristicByText.set(ev.text, ev.needsAnswer);
   const labelsFile = opts.labelsFile ?? defaultLabelsFile(file);
-  const labels = existsSync(labelsFile) ? LabelsFileSchema(JSON.parse(readFileSync(labelsFile, 'utf8'))) : null;
+  const labels = existsSync(labelsFile)
+    ? LabelsFileSchema(JSON.parse(readFileSync(labelsFile, 'utf8')))
+    : null;
 
   const themSegments: ReplaySegment[] = events
-    .filter((ev): ev is Extract<SessionLogEvent, { ev: 'transcript.final' }> => ev.ev === 'transcript.final' && ev.channel === 'them')
+    .filter(
+      (ev): ev is Extract<SessionLogEvent, { ev: 'transcript.final' }> =>
+        ev.ev === 'transcript.final' && ev.channel === 'them',
+    )
     .map((ev) => ({ id: ev.id, t: ev.t, text: ev.text, startMs: ev.startMs, endMs: ev.endMs }));
 
   const truth = new Map<string, boolean>();
@@ -211,7 +222,11 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
     }
   }
   const gtSource: Level2Result['groundTruth']['source'] =
-    labeledFromFile && labeledFromHeuristic ? 'labels+heuristic' : labeledFromFile ? 'labels' : 'heuristic';
+    labeledFromFile && labeledFromHeuristic
+      ? 'labels+heuristic'
+      : labeledFromFile
+        ? 'labels'
+        : 'heuristic';
 
   // ---------- Replay ----------
   const clock = new VirtualClock();
@@ -236,7 +251,16 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
       }
       if (!ids.length && fed.length) ids.push(fed[fed.length - 1]!.id);
       const gt = ids.length ? ids.some((id) => truth.get(id) === true) : null;
-      detections.push({ t: clock.now, question: q.question, qtype: q.qtype, needsAnswer: q.needsAnswer, source: q.source, score: q.score, segmentIds: ids, groundTruth: gt });
+      detections.push({
+        t: clock.now,
+        question: q.question,
+        qtype: q.qtype,
+        needsAnswer: q.needsAnswer,
+        source: q.source,
+        score: q.score,
+        segmentIds: ids,
+        groundTruth: gt,
+      });
     },
   });
 
@@ -261,9 +285,16 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
       case 'user.action':
         if (ev.action === 'answer') {
           const last = fed.length ? fed[fed.length - 1]! : null;
-          const hadDetection = last ? detections.some((d) => d.needsAnswer && d.t >= last.t && d.t <= ev.t) : false;
+          const hadDetection = last
+            ? detections.some((d) => d.needsAnswer && d.t >= last.t && d.t <= ev.t)
+            : false;
           const pending = pipeline.flush();
-          forced.push({ t: ev.t, lastSegment: last, hadDetection, pendingText: pending?.text ?? null });
+          forced.push({
+            t: ev.t,
+            lastSegment: last,
+            hadDetection,
+            pendingText: pending?.text ?? null,
+          });
         } else if (ev.action === 'clear' || ev.action === 'end') {
           pipeline.reset();
         }
@@ -273,7 +304,14 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
         break;
       case 'user.feedback': {
         const a = answerStarts.get(ev.messageId);
-        feedbackEntries.push({ t: ev.t, messageId: ev.messageId, value: ev.value, note: ev.note, question: a?.question ?? null, kind: a?.kind ?? null });
+        feedbackEntries.push({
+          t: ev.t,
+          messageId: ev.messageId,
+          value: ev.value,
+          note: ev.note,
+          question: a?.question ?? null,
+          kind: a?.kind ?? null,
+        });
         break;
       }
       default:
@@ -304,7 +342,11 @@ export async function replaySession(file: string, opts: Level2Options = {}): Pro
     parsed: events.length,
     invalidLines,
     themSegments: themSegments.length,
-    groundTruth: { source: gtSource, positives: [...truth.values()].filter(Boolean).length, labeled: labeledFromFile },
+    groundTruth: {
+      source: gtSource,
+      positives: [...truth.values()].filter(Boolean).length,
+      labeled: labeledFromFile,
+    },
     detections,
     detectedNeedsAnswer: detections.filter((d) => d.needsAnswer).length,
     metrics: finalize(metrics),
@@ -336,13 +378,21 @@ export function summarizeLevel2(r: Level2Result): string {
   );
 }
 
-export function renderLevel2Markdown(results: Level2Result[], generatedAt: Date = new Date()): string {
+export function renderLevel2Markdown(
+  results: Level2Result[],
+  generatedAt: Date = new Date(),
+): string {
   const lines: string[] = [];
   lines.push('# Backtesting nivel 2: replay de sesiones', '');
   lines.push(`- Generado: ${generatedAt.toISOString()}`);
   lines.push(`- Sesiones: ${results.length}`, '');
 
-  lines.push('## Resumen', '', '| Sesión | Eventos válidos | Seg. THEM | Reales | Detectadas | TP | FP | FN | Precisión | Recall | F1 | Forzadas (sin detección) | Feedback +/- |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+  lines.push(
+    '## Resumen',
+    '',
+    '| Sesión | Eventos válidos | Seg. THEM | Reales | Detectadas | TP | FP | FN | Precisión | Recall | F1 | Forzadas (sin detección) | Feedback +/- |',
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|',
+  );
   for (const r of results) {
     const m = r.metrics;
     const forcedMissed = r.forced.filter((f) => !f.hadDetection).length;
@@ -354,17 +404,28 @@ export function renderLevel2Markdown(results: Level2Result[], generatedAt: Date 
 
   for (const r of results) {
     lines.push(`## ${path.basename(r.file)}`, '');
-    lines.push(`- Sesión: \`${r.sessionId ?? '?'}\`; opciones: debounce ${r.options.debounceMs} ms, fallback ${r.options.utteranceEndFallbackMs} ms, clasificador ${r.options.useLlm ? 'FakeLlmProvider' : 'ninguno'}`);
-    if (r.invalidLines.length) lines.push(`- Líneas inválidas (ignoradas): ${r.invalidLines.join(', ')}`);
-    lines.push(`- Verdad de referencia: ${r.groundTruth.source}${r.groundTruth.labeled ? ` (${r.groundTruth.labeled} segmentos etiquetados a mano)` : ''}`, '');
+    lines.push(
+      `- Sesión: \`${r.sessionId ?? '?'}\`; opciones: debounce ${r.options.debounceMs} ms, fallback ${r.options.utteranceEndFallbackMs} ms, clasificador ${r.options.useLlm ? 'FakeLlmProvider' : 'ninguno'}`,
+    );
+    if (r.invalidLines.length)
+      lines.push(`- Líneas inválidas (ignoradas): ${r.invalidLines.join(', ')}`);
+    lines.push(
+      `- Verdad de referencia: ${r.groundTruth.source}${r.groundTruth.labeled ? ` (${r.groundTruth.labeled} segmentos etiquetados a mano)` : ''}`,
+      '',
+    );
 
     lines.push('### Preguntas detectadas', '');
     if (!r.detections.length) lines.push('Ninguna.', '');
     else {
-      lines.push('| t | Tipo | needsAnswer | Fuente | Score | Pregunta | Segmentos | Referencia |', '|---|---|---|---|---|---|---|---|');
+      lines.push(
+        '| t | Tipo | needsAnswer | Fuente | Score | Pregunta | Segmentos | Referencia |',
+        '|---|---|---|---|---|---|---|---|',
+      );
       for (const d of r.detections) {
         const gt = d.groundTruth === null ? '—' : d.groundTruth ? 'pregunta' : 'no pregunta';
-        lines.push(`| ${fmtT(d.t)} | ${d.qtype} | ${d.needsAnswer ? 'sí' : 'no'} | ${d.source} | ${d.score} | ${cell(d.question)} | ${d.segmentIds.join(', ')} | ${gt} |`);
+        lines.push(
+          `| ${fmtT(d.t)} | ${d.qtype} | ${d.needsAnswer ? 'sí' : 'no'} | ${d.source} | ${d.score} | ${cell(d.question)} | ${d.segmentIds.join(', ')} | ${gt} |`,
+        );
       }
       lines.push('');
     }
@@ -381,16 +442,24 @@ export function renderLevel2Markdown(results: Level2Result[], generatedAt: Date 
     if (!r.falsePositives.length) lines.push('Ninguno.', '');
     else {
       lines.push('| t | Tipo | Pregunta | Segmentos |', '|---|---|---|---|');
-      for (const d of r.falsePositives) lines.push(`| ${fmtT(d.t)} | ${d.qtype} | ${cell(d.question)} | ${d.segmentIds.join(', ')} |`);
+      for (const d of r.falsePositives)
+        lines.push(
+          `| ${fmtT(d.t)} | ${d.qtype} | ${cell(d.question)} | ${d.segmentIds.join(', ')} |`,
+        );
       lines.push('');
     }
 
     lines.push(`### Respuestas forzadas por el usuario (${r.forced.length})`, '');
     if (!r.forced.length) lines.push('Ninguna.', '');
     else {
-      lines.push('| t | Detección previa | Último segmento THEM | Pendiente en el pipeline |', '|---|---|---|---|');
+      lines.push(
+        '| t | Detección previa | Último segmento THEM | Pendiente en el pipeline |',
+        '|---|---|---|---|',
+      );
       for (const f of r.forced) {
-        lines.push(`| ${fmtT(f.t)} | ${f.hadDetection ? 'sí' : '**no**'} | ${f.lastSegment ? `${f.lastSegment.id}: ${cell(f.lastSegment.text)}` : '—'} | ${f.pendingText ? cell(f.pendingText) : '—'} |`);
+        lines.push(
+          `| ${fmtT(f.t)} | ${f.hadDetection ? 'sí' : '**no**'} | ${f.lastSegment ? `${f.lastSegment.id}: ${cell(f.lastSegment.text)}` : '—'} | ${f.pendingText ? cell(f.pendingText) : '—'} |`,
+        );
       }
       lines.push('');
     }
@@ -400,7 +469,9 @@ export function renderLevel2Markdown(results: Level2Result[], generatedAt: Date 
     else {
       lines.push('| t | Valor | Tipo de respuesta | Pregunta | Nota |', '|---|---|---|---|---|');
       for (const f of r.feedback.entries) {
-        lines.push(`| ${fmtT(f.t)} | ${f.value === 'up' ? '👍' : '👎'} | ${f.kind ?? '—'} | ${f.question ? cell(f.question) : '—'} | ${f.note ? cell(f.note) : '—'} |`);
+        lines.push(
+          `| ${fmtT(f.t)} | ${f.value === 'up' ? '👍' : '👎'} | ${f.kind ?? '—'} | ${f.question ? cell(f.question) : '—'} | ${f.note ? cell(f.note) : '—'} |`,
+        );
       }
       lines.push('');
     }

@@ -13,7 +13,9 @@ describe('sesiones JSONL de ejemplo', () => {
   });
 
   it.each(files)('%s parsea al 100 %% con SessionLogEventSchema', (file) => {
-    const lines = readFileSync(path.join(SESSIONS_DIR, file), 'utf8').split('\n').filter((l) => l.trim());
+    const lines = readFileSync(path.join(SESSIONS_DIR, file), 'utf8')
+      .split('\n')
+      .filter((l) => l.trim());
     expect(lines.length).toBeGreaterThan(0);
     const events = lines.map((l) => parseSessionLogLine(l));
     const bad = events.map((e, i) => (e ? null : i + 1)).filter((x) => x !== null);
@@ -24,6 +26,7 @@ describe('sesiones JSONL de ejemplo', () => {
     expect(events.some((e) => e?.ev === 'user.feedback')).toBe(true);
     expect(events.some((e) => e?.ev === 'user.action')).toBe(true);
     // Los tiempos son crecientes.
-    for (let i = 1; i < events.length; i++) expect(events[i]!.t).toBeGreaterThanOrEqual(events[i - 1]!.t);
+    for (let i = 1; i < events.length; i++)
+      expect(events[i]!.t).toBeGreaterThanOrEqual(events[i - 1]!.t);
   });
 });

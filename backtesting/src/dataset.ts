@@ -20,7 +20,15 @@ export type DatasetItem = z.infer<typeof DatasetItemSchema>;
 
 export const DatasetSchema = z.array(DatasetItemSchema);
 
-export const QUESTION_TYPES: QuestionType[] = ['behavioral', 'technical', 'coding', 'objection', 'clarification', 'smalltalk', 'other'];
+export const QUESTION_TYPES: QuestionType[] = [
+  'behavioral',
+  'technical',
+  'coding',
+  'objection',
+  'clarification',
+  'smalltalk',
+  'other',
+];
 
 /** Lee y valida el dataset; lanza si el JSON no cumple el esquema o hay ids repetidos. */
 export function loadDataset(file: string = QUESTIONS_DATASET): DatasetItem[] {
@@ -30,7 +38,8 @@ export function loadDataset(file: string = QUESTIONS_DATASET): DatasetItem[] {
     if (seen.has(it.id)) throw new Error(`id duplicado en el dataset: ${it.id}`);
     seen.add(it.id);
     // Una frase que necesita respuesta es, por definición, una pregunta.
-    if (it.needsAnswer && !it.isQuestion) throw new Error(`${it.id}: needsAnswer=true exige isQuestion=true`);
+    if (it.needsAnswer && !it.isQuestion)
+      throw new Error(`${it.id}: needsAnswer=true exige isQuestion=true`);
   }
   return items;
 }

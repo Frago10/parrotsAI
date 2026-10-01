@@ -27,9 +27,12 @@ function runLevel1Cli(): Level1Result {
   if (result.failures.length) {
     console.log('Fallos:');
     for (const f of result.failures.slice(0, 20)) {
-      console.log(`  - ${f.id} [${f.mismatches.join(',')}] "${f.text}" esperado=${f.expected.needsAnswer}/${f.expected.type} obtenido=${f.got.needsAnswer}/${f.got.type} (${f.reasons.join(',') || 'sin señales'})`);
+      console.log(
+        `  - ${f.id} [${f.mismatches.join(',')}] "${f.text}" esperado=${f.expected.needsAnswer}/${f.expected.type} obtenido=${f.got.needsAnswer}/${f.got.type} (${f.reasons.join(',') || 'sin señales'})`,
+      );
     }
-    if (result.failures.length > 20) console.log(`  ... y ${result.failures.length - 20} más (ver reporte)`);
+    if (result.failures.length > 20)
+      console.log(`  ... y ${result.failures.length - 20} más (ver reporte)`);
   }
   console.log(`Reporte: ${report.path}`);
   return result;

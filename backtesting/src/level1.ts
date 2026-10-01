@@ -46,7 +46,13 @@ export interface Level1Result {
   isQuestion: { global: BinaryMetrics; byLang: Record<DatasetLang, BinaryMetrics> };
   needsAnswer: { global: BinaryMetrics; byLang: Record<DatasetLang, BinaryMetrics> };
   /** Matriz de confusión de tipo solo sobre los ítems etiquetados como pregunta (filas: esperado, columnas: obtenido). */
-  typeConfusion: { labels: QuestionType[]; matrix: number[][]; total: number; correct: number; accuracy: number };
+  typeConfusion: {
+    labels: QuestionType[];
+    matrix: number[][];
+    total: number;
+    correct: number;
+    accuracy: number;
+  };
   smalltalk: { total: number; answered: number; rate: number };
   failures: Level1Failure[];
   thresholds: Level1Thresholds;
@@ -113,18 +119,48 @@ export function runLevel1(
   const needsAnswerGlobal = finalize(na.global);
   const smalltalkRate = smalltalkTotal ? smalltalkAnswered / smalltalkTotal : 0;
   const checks: Level1Check[] = [
-    { name: 'recall needsAnswer', value: needsAnswerGlobal.recall, target: thresholds.needsAnswerRecall, kind: 'min', ok: needsAnswerGlobal.recall >= thresholds.needsAnswerRecall },
-    { name: 'precisión needsAnswer', value: needsAnswerGlobal.precision, target: thresholds.needsAnswerPrecision, kind: 'min', ok: needsAnswerGlobal.precision >= thresholds.needsAnswerPrecision },
-    { name: 'smalltalk respondido', value: smalltalkRate, target: thresholds.smalltalkAnsweredRate, kind: 'max', ok: smalltalkRate <= thresholds.smalltalkAnsweredRate },
+    {
+      name: 'recall needsAnswer',
+      value: needsAnswerGlobal.recall,
+      target: thresholds.needsAnswerRecall,
+      kind: 'min',
+      ok: needsAnswerGlobal.recall >= thresholds.needsAnswerRecall,
+    },
+    {
+      name: 'precisión needsAnswer',
+      value: needsAnswerGlobal.precision,
+      target: thresholds.needsAnswerPrecision,
+      kind: 'min',
+      ok: needsAnswerGlobal.precision >= thresholds.needsAnswerPrecision,
+    },
+    {
+      name: 'smalltalk respondido',
+      value: smalltalkRate,
+      target: thresholds.smalltalkAnsweredRate,
+      kind: 'max',
+      ok: smalltalkRate <= thresholds.smalltalkAnsweredRate,
+    },
   ];
 
   return {
     datasetPath,
     total: items.length,
     byLang,
-    isQuestion: { global: finalize(isQ.global), byLang: { es: finalize(isQ.byLang.es), en: finalize(isQ.byLang.en) } },
-    needsAnswer: { global: needsAnswerGlobal, byLang: { es: finalize(na.byLang.es), en: finalize(na.byLang.en) } },
-    typeConfusion: { labels: [...QUESTION_TYPES], matrix, total: typeTotal, correct: typeCorrect, accuracy: typeTotal ? typeCorrect / typeTotal : 0 },
+    isQuestion: {
+      global: finalize(isQ.global),
+      byLang: { es: finalize(isQ.byLang.es), en: finalize(isQ.byLang.en) },
+    },
+    needsAnswer: {
+      global: needsAnswerGlobal,
+      byLang: { es: finalize(na.byLang.es), en: finalize(na.byLang.en) },
+    },
+    typeConfusion: {
+      labels: [...QUESTION_TYPES],
+      matrix,
+      total: typeTotal,
+      correct: typeCorrect,
+      accuracy: typeTotal ? typeCorrect / typeTotal : 0,
+    },
     smalltalk: { total: smalltalkTotal, answered: smalltalkAnswered, rate: smalltalkRate },
     failures,
     thresholds,
@@ -137,7 +173,11 @@ function metricsRow(name: string, m: BinaryMetrics): string {
   return `| ${name} | ${ratio(m.precision)} | ${ratio(m.recall)} | ${ratio(m.f1)} | ${m.tp} | ${m.fp} | ${m.fn} | ${m.tn} |`;
 }
 
-function metricsTable(title: string, global: BinaryMetrics, byLang: Record<DatasetLang, BinaryMetrics>): string[] {
+function metricsTable(
+  title: string,
+  global: BinaryMetrics,
+  byLang: Record<DatasetLang, BinaryMetrics>,
+): string[] {
   return [
     `### ${title}`,
     '',
@@ -164,12 +204,16 @@ export function renderLevel1Markdown(r: Level1Result, generatedAt: Date = new Da
   const lines: string[] = [];
   lines.push('# Backtesting nivel 1: heurística de preguntas', '');
   lines.push(`- Generado: ${generatedAt.toISOString()}`);
-  lines.push(`- Dataset: \`${r.datasetPath}\` (${r.total} frases: es=${r.byLang.es}, en=${r.byLang.en})`);
+  lines.push(
+    `- Dataset: \`${r.datasetPath}\` (${r.total} frases: es=${r.byLang.es}, en=${r.byLang.en})`,
+  );
   lines.push(`- Resultado: **${r.passed ? 'PASA' : 'NO PASA'}**`, '');
 
   lines.push('## Umbrales', '', '| Métrica | Valor | Objetivo | OK |', '|---|---|---|---|');
   for (const c of r.checks) {
-    lines.push(`| ${c.name} | ${ratio(c.value)} | ${c.kind === 'min' ? '≥' : '≤'} ${ratio(c.target)} | ${c.ok ? 'sí' : '**no**'} |`);
+    lines.push(
+      `| ${c.name} | ${ratio(c.value)} | ${c.kind === 'min' ? '≥' : '≤'} ${ratio(c.target)} | ${c.ok ? 'sí' : '**no**'} |`,
+    );
   }
   lines.push('');
 
@@ -178,25 +222,38 @@ export function renderLevel1Markdown(r: Level1Result, generatedAt: Date = new Da
   lines.push(...metricsTable('isQuestion', r.isQuestion.global, r.isQuestion.byLang));
 
   lines.push('## Tipo de pregunta (solo ítems etiquetados como pregunta)', '');
-  lines.push(`Accuracy de tipo: ${ratio(r.typeConfusion.accuracy)} (${r.typeConfusion.correct}/${r.typeConfusion.total}). Filas: esperado; columnas: obtenido.`, '');
+  lines.push(
+    `Accuracy de tipo: ${ratio(r.typeConfusion.accuracy)} (${r.typeConfusion.correct}/${r.typeConfusion.total}). Filas: esperado; columnas: obtenido.`,
+    '',
+  );
   lines.push(`| esperado \\ obtenido | ${r.typeConfusion.labels.join(' | ')} |`);
   lines.push(`|---|${r.typeConfusion.labels.map(() => '---').join('|')}|`);
   r.typeConfusion.labels.forEach((label, i) => {
-    lines.push(`| ${label} | ${r.typeConfusion.matrix[i]!.map((n) => (n ? String(n) : '·')).join(' | ')} |`);
+    lines.push(
+      `| ${label} | ${r.typeConfusion.matrix[i]!.map((n) => (n ? String(n) : '·')).join(' | ')} |`,
+    );
   });
   lines.push('');
 
   lines.push('## Smalltalk respondido', '');
-  lines.push(`${r.smalltalk.answered} de ${r.smalltalk.total} frases de smalltalk se marcaron con needsAnswer=true (${pct(r.smalltalk.rate)}).`, '');
+  lines.push(
+    `${r.smalltalk.answered} de ${r.smalltalk.total} frases de smalltalk se marcaron con needsAnswer=true (${pct(r.smalltalk.rate)}).`,
+    '',
+  );
 
   lines.push(`## Fallos (${r.failures.length})`, '');
   if (!r.failures.length) lines.push('Sin fallos.', '');
   else {
-    lines.push('| id | texto | esperado | obtenido | score | reasons |', '|---|---|---|---|---|---|');
+    lines.push(
+      '| id | texto | esperado | obtenido | score | reasons |',
+      '|---|---|---|---|---|---|',
+    );
     for (const f of r.failures) {
       const exp = `q=${f.expected.isQuestion} na=${f.expected.needsAnswer} ${f.expected.type}`;
       const got = `q=${f.got.isQuestion} na=${f.got.needsAnswer} ${f.got.type}`;
-      lines.push(`| ${f.id} | ${cell(f.text)} | ${exp} | ${got} (${f.mismatches.join(', ')}) | ${f.got.score} | ${f.reasons.join(', ') || '—'} |`);
+      lines.push(
+        `| ${f.id} | ${cell(f.text)} | ${exp} | ${got} (${f.mismatches.join(', ')}) | ${f.got.score} | ${f.reasons.join(', ') || '—'} |`,
+      );
     }
     lines.push('');
   }

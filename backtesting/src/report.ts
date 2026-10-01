@@ -7,7 +7,10 @@ export type ReportLevel = 'level1' | 'level2' | 'all';
 
 /** Fecha ISO compacta apta para nombres de archivo: 20261001T174300Z. */
 export function compactIso(date: Date = new Date()): string {
-  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  return date
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}Z$/, 'Z');
 }
 
 export interface WrittenReport {
@@ -15,7 +18,11 @@ export interface WrittenReport {
   latestPath: string;
 }
 
-export function writeReport(level: ReportLevel, markdown: string, opts: { dir?: string; now?: Date } = {}): WrittenReport {
+export function writeReport(
+  level: ReportLevel,
+  markdown: string,
+  opts: { dir?: string; now?: Date } = {},
+): WrittenReport {
   const dir = opts.dir ?? REPORTS_DIR;
   mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${compactIso(opts.now)}-${level}.md`);

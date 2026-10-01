@@ -15,12 +15,7 @@ export interface HeuristicResult {
 
 /** Quita acentos, pasa a minúsculas y colapsa espacios. */
 export function normalizeText(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 // "si"/"no" solo se tratan como muletilla cuando van seguidos de coma ("no, ¿cómo lo harías?"):
@@ -86,7 +81,8 @@ const REQUEST_ANYWHERE =
 const IMPERATIVE_START =
   /^(?:escribe|escriba|escribeme|implementa|implemente|implementame|crea|creame|programa|codifica|resuelve|resuelveme|optimiza|refactoriza|diseña|disena|disename|calcula|convierte|transforma|construye|arma|haz|hazme|muestrame|demuestra|invierte|ordena|encuentra|devuelve|imprime|valida|genera|elimina|recorre|combina|filtra|agrupa|write|implement|create|code|solve|optimize|refactor|build|design|compute|calculate|convert|transform|show me|demonstrate|prove|find|return|print|reverse|sort|parse|validate)\b/;
 
-const TAG_QUESTION = /\b(?:verdad|no|cierto|right|correct|isn't it|don't you|aren't you|wouldn't you|okay|ok)\s*\?\s*$/;
+const TAG_QUESTION =
+  /\b(?:verdad|no|cierto|right|correct|isn't it|don't you|aren't you|wouldn't you|okay|ok)\s*\?\s*$/;
 
 const INTERROGATIVE_ANYWHERE =
   /\b(?:como|cual|cuales|cuando|cuanto|cuantos|donde|por que|para que|quien|what|which|how|when|where|why|who)\b/;
@@ -115,7 +111,8 @@ const CODING_STRONG =
 // si la frase es un imperativo ("sort this array") o un "cómo harías / how would you".
 const CODING_WEAK =
   /\b(?:sql|consulta sql|query|queries|join|group by|array|arreglo|arrays|lista enlazada|linked list|arbol binario|binary tree|arbol|grafo|graph|ordenar|ordena|sort|sorting|invertir|invierte|reverse|string|cadena|hash|hashmap|diccionario|dictionary|stack|pila|cola|queue|programa|program|pandas|dataframe|numpy|python script|duplicados|duplicates|matriz|matrix)\b/;
-const CODING_HOW_WOULD = /\b(?:how would you|how do you|como (?:harias|resolverias|implementarias|encontrarias|detectarias|invertirias|ordenarias|calcularias|lo harias|lo resolverias))\b/;
+const CODING_HOW_WOULD =
+  /\b(?:how would you|how do you|como (?:harias|resolverias|implementarias|encontrarias|detectarias|invertirias|ordenarias|calcularias|lo harias|lo resolverias))\b/;
 
 const BEHAVIORAL =
   /\b(?:cuentame de una vez|cuentame sobre una vez|cuentame de alguna vez|cuentame sobre alguna|cuentame una situacion|cuentame de un momento|cuentame una experiencia|describe una situacion|describeme una situacion|situacion en la que|un momento en el que|una vez que|alguna vez que|alguna vez has|has tenido que|tell me about a time|tell me about a situation|tell me about an experience|describe a time|describe a situation|a situation where|a time when|a time where|give me an example of a time|give me an example of when|ejemplo de una vez|ejemplo de alguna vez|experiencia|experience|background|trayectoria|fortaleza|fortalezas|debilidad|debilidades|strength|strengths|weakness|weaknesses|por que quieres|por que te interesa|por que te gustaria|por que deberiamos|por que esta empresa|por que nosotros|why do you want|why are you interested|why would you like|why should we|why this company|why us|donde te ves|where do you see yourself|hablame de ti|hablame sobre ti|cuentame de ti|cuentame sobre ti|tell me about yourself|walk me through your resume|walk me through your cv|walk me through your background|cuentame tu trayectoria|conflicto|conflict|desacuerdo|disagree|disagreement|fracaso|failure|failed|fallaste|te equivocaste|error que cometiste|mistake|logro|logros|achievement|achievements|orgulloso|orgullosa|proud|motiva|motivacion|motivat|liderazgo|leadership|lead a team|liderar|lideraste|equipo|team|teammate|companero|feedback|retroalimentacion|critica|criticism|dificil|difficult|hard decision|decision dificil|challenge|challenging|desafio|desafiante|reto|salario|sueldo|salary|compensation|expectativa salarial|disponibilidad|availability|notice period|cuando podrias empezar|when can you start|por que dejaste|why did you leave|why are you leaving|por que te vas|cultura|culture|valores|values|prioriza|prioritize|priorities|bajo presion|under pressure|deadline|deadlines|fecha limite|plazo|plazos|plazos ajustados|tight deadline|presion|pressure|carga de trabajo|workload|organizas|organize|stress|estres|manejas el estres|aprendiste|learned|aprendizaje|lesson|supera|overcame|overcome|work style|estilo de trabajo|manage your time|manejas tu tiempo|preguntas para mi|preguntas para nosotros|alguna pregunta para|any question for|questions for me|questions for us|any questions)\b/;
@@ -137,7 +134,10 @@ function evaluateSentence(original: string): SentenceEval {
   const norm = stripFillers(normFull);
   const reasons: string[] = [];
   let score = 0;
-  const words = norm.replace(/[¿?¡!.,;:]/g, '').split(' ').filter(Boolean).length;
+  const words = norm
+    .replace(/[¿?¡!.,;:]/g, '')
+    .split(' ')
+    .filter(Boolean).length;
   const hasMark = /\?\s*$/.test(norm) || norm.includes('¿') || original.includes('?');
   const reported = REPORTED_SPEECH.test(original.toLowerCase());
 
@@ -182,13 +182,18 @@ function evaluateSentence(original: string): SentenceEval {
     score += 0.7;
     reasons.push('objection');
   }
-  if (!reasons.includes('interrogative_start') && INTERROGATIVE_ANYWHERE.test(norm) && words >= 4 && !reported) {
-    if (!reasons.includes('wh_subordinate') && !reasons.includes('wh_unaccented')) {
+  if (!reasons.includes('interrogative_start') && !reported) {
+    if (
+      INTERROGATIVE_ANYWHERE.test(norm) &&
+      words >= 4 &&
+      !reasons.includes('wh_subordinate') &&
+      !reasons.includes('wh_unaccented')
+    ) {
       score += 0.2;
       reasons.push('interrogative_inside');
     }
-    // "cómo lo manejan ustedes" / "how do you handle it" en medio de la frase, salvo tras
-    // un verbo de conocimiento ("no sé cómo lo hicieron").
+    // "cómo lo manejan ustedes" / "how do you handle it" en medio de la frase (o al inicio sin tilde,
+    // "como lo harias"), salvo tras un verbo de conocimiento ("no sé cómo lo hicieron").
     if (WH_INSIDE_QUESTION.test(norm) && !KNOWLEDGE_BEFORE_WH.test(norm)) {
       score += 0.25;
       reasons.push('wh_inside_question');
@@ -200,10 +205,14 @@ function evaluateSentence(original: string): SentenceEval {
 }
 
 /** Frase que es solo una coletilla ("¿verdad?", "¿no?", "right?"): se evalúa junto con la frase anterior. */
-const TAG_ONLY = /^[¿¡"'\s]*(?:verdad|no|cierto|right|correct|ok|okay|isn't it|don't you)\s*[?!.]*$/;
+const TAG_ONLY =
+  /^[¿¡"'\s]*(?:verdad|no|cierto|right|correct|ok|okay|isn't it|don't you)\s*[?!.]*$/;
 
 export function classifyQuestionType(norm: string): QuestionType {
-  const words = norm.replace(/[¿?¡!.,;:]/g, '').split(' ').filter(Boolean).length;
+  const words = norm
+    .replace(/[¿?¡!.,;:]/g, '')
+    .split(' ')
+    .filter(Boolean).length;
   if (AUDIO_CHECK.test(norm) && words <= 15) return 'smalltalk';
   if (SMALLTALK.test(norm.replace(/[¿¡]/g, '').trim())) return 'smalltalk';
   // Las aclaraciones cortas van antes del residuo de smalltalk: "sorry, come again?" contiene
@@ -214,12 +223,15 @@ export function classifyQuestionType(norm: string): QuestionType {
       .replace(/[¿?¡!.,;:]/g, ' ')
       .split(' ')
       .filter(Boolean);
-    if (residue.length <= 2 && norm !== stripFillers(norm.replace(SMALLTALK_PHRASES, ' ')).trim()) return 'smalltalk';
+    if (residue.length <= 2 && norm !== stripFillers(norm.replace(SMALLTALK_PHRASES, ' ')).trim())
+      return 'smalltalk';
   }
   if (OBJECTION.test(norm)) return 'objection';
-  if (words <= 2 && /^(?:como|perdon|que|sorry|what|pardon|eh|huh)\s*\??$/.test(norm)) return 'clarification';
+  if (words <= 2 && /^(?:como|perdon|que|sorry|what|pardon|eh|huh)\s*\??$/.test(norm))
+    return 'clarification';
   if (CODING_STRONG.test(norm) || CODING_TASK.test(norm)) return 'coding';
-  if (CODING_WEAK.test(norm) && (IMPERATIVE_START.test(norm) || CODING_HOW_WOULD.test(norm))) return 'coding';
+  if (CODING_WEAK.test(norm) && (IMPERATIVE_START.test(norm) || CODING_HOW_WOULD.test(norm)))
+    return 'coding';
   if (BEHAVIORAL.test(norm)) return 'behavioral';
   if (TECHNICAL.test(norm)) return 'technical';
   return 'other';
@@ -234,14 +246,22 @@ export const QUESTION_THRESHOLD = 0.4;
 export function detectQuestionHeuristic(text: string): HeuristicResult {
   const trimmed = text.trim();
   if (!trimmed) {
-    return { isQuestion: false, needsAnswer: false, type: 'other', question: '', score: 0, reasons: [] };
+    return {
+      isQuestion: false,
+      needsAnswer: false,
+      type: 'other',
+      question: '',
+      score: 0,
+      reasons: [],
+    };
   }
   const sentences: string[] = [];
   for (const part of trimmed.split(SENTENCE_SPLIT)) {
     const s = part.trim();
     if (!s) continue;
     // "El despliegue es los viernes, ¿verdad?" se parte en dos; la coletilla sola no dice de qué va la pregunta.
-    if (sentences.length && TAG_ONLY.test(normalizeText(s))) sentences[sentences.length - 1] += ` ${s}`;
+    if (sentences.length && TAG_ONLY.test(normalizeText(s)))
+      sentences[sentences.length - 1] += ` ${s}`;
     else sentences.push(s);
   }
   const evals = (sentences.length ? sentences : [trimmed]).map(evaluateSentence);
