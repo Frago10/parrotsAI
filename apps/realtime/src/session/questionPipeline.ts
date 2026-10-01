@@ -1,6 +1,10 @@
 // Pipeline de detección de preguntas: heurística inmediata + clasificador LLM con debounce
 // tras fin de turno. Independiente del transporte para poder testearlo y reproducirlo.
-import { buildClassifierUserPrompt, CLASSIFIER_SYSTEM_PROMPT, detectQuestionHeuristic } from '@callpilot/shared';
+import {
+  buildClassifierUserPrompt,
+  CLASSIFIER_SYSTEM_PROMPT,
+  detectQuestionHeuristic,
+} from '@callpilot/shared';
 import type { HeuristicResult, QuestionType } from '@callpilot/shared';
 import { extractJson, type LlmProvider } from '@callpilot/ai';
 
@@ -37,7 +41,15 @@ interface ClassifierJson {
   needsAnswer?: boolean;
 }
 
-const VALID_TYPES: QuestionType[] = ['behavioral', 'technical', 'coding', 'objection', 'clarification', 'smalltalk', 'other'];
+const VALID_TYPES: QuestionType[] = [
+  'behavioral',
+  'technical',
+  'coding',
+  'objection',
+  'clarification',
+  'smalltalk',
+  'other',
+];
 
 export class QuestionPipeline {
   private pending: { text: string; heuristic: HeuristicResult } | null = null;
@@ -111,7 +123,15 @@ export class QuestionPipeline {
     if (!useLlm) {
       if (h.isQuestion) {
         this.opts.onDetected(
-          { question: h.question, qtype: h.type, needsAnswer: h.needsAnswer, source: 'heuristic', score: h.score, heuristic: h, classifierLatencyMs: null },
+          {
+            question: h.question,
+            qtype: h.type,
+            needsAnswer: h.needsAnswer,
+            source: 'heuristic',
+            score: h.score,
+            heuristic: h,
+            classifierLatencyMs: null,
+          },
           p.text,
         );
       }
@@ -122,7 +142,9 @@ export class QuestionPipeline {
       const res = await this.opts.llm!.complete({
         model: this.opts.classifierModel,
         system: CLASSIFIER_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: buildClassifierUserPrompt(this.opts.recentThem(), p.text) }],
+        messages: [
+          { role: 'user', content: buildClassifierUserPrompt(this.opts.recentThem(), p.text) },
+        ],
         maxTokens: 200,
         temperature: 0,
         purpose: 'classify',
@@ -133,12 +155,23 @@ export class QuestionPipeline {
       const json = extractJson<ClassifierJson>(res.text);
       let detected: DetectedQuestion;
       if (!json) {
-        detected = { question: h.question, qtype: h.type, needsAnswer: h.needsAnswer, source: 'heuristic', score: h.score, heuristic: h, classifierLatencyMs: latencyMs };
+        detected = {
+          question: h.question,
+          qtype: h.type,
+          needsAnswer: h.needsAnswer,
+          source: 'heuristic',
+          score: h.score,
+          heuristic: h,
+          classifierLatencyMs: latencyMs,
+        };
       } else {
-        const qtype = VALID_TYPES.includes(json.type as QuestionType) ? (json.type as QuestionType) : h.type;
+        const qtype = VALID_TYPES.includes(json.type as QuestionType)
+          ? (json.type as QuestionType)
+          : h.type;
         const isQuestion = Boolean(json.isQuestion) || h.isQuestion;
         // El clasificador manda sobre needsAnswer, salvo que la heurística sea muy segura (≥ 1.0) y el LLM diga que no.
-        const needsAnswer = isQuestion && qtype !== 'smalltalk' && (Boolean(json.needsAnswer) || h.score >= 1.0);
+        const needsAnswer =
+          isQuestion && qtype !== 'smalltalk' && (Boolean(json.needsAnswer) || h.score >= 1.0);
         detected = {
           question: (json.question && json.question.trim()) || h.question || p.text,
           qtype,
@@ -150,12 +183,21 @@ export class QuestionPipeline {
         };
       }
       this.opts.onClassified?.(detected, latencyMs);
-      if (detected.needsAnswer || detected.heuristic.isQuestion) this.opts.onDetected(detected, p.text);
+      if (detected.needsAnswer || detected.heuristic.isQuestion)
+        this.opts.onDetected(detected, p.text);
     } catch (err) {
       this.opts.onError?.(err instanceof Error ? err : new Error(String(err)));
       if (h.isQuestion) {
         this.opts.onDetected(
-          { question: h.question, qtype: h.type, needsAnswer: h.needsAnswer, source: 'heuristic', score: h.score, heuristic: h, classifierLatencyMs: null },
+          {
+            question: h.question,
+            qtype: h.type,
+            needsAnswer: h.needsAnswer,
+            source: 'heuristic',
+            score: h.score,
+            heuristic: h,
+            classifierLatencyMs: null,
+          },
           p.text,
         );
       }

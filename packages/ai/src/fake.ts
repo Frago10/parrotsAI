@@ -1,6 +1,12 @@
 // Proveedor simulado: determinista, sin red. Sirve para desarrollo sin claves y para backtesting.
 import { answerLabels, detectQuestionHeuristic } from '@callpilot/shared';
-import type { LlmCallOptions, LlmCompletion, LlmProvider, LlmRequest, LlmStreamEvent } from './types';
+import type {
+  LlmCallOptions,
+  LlmCompletion,
+  LlmProvider,
+  LlmRequest,
+  LlmStreamEvent,
+} from './types';
 import { collectStream, estimateTokens } from './types';
 
 export interface FakeProviderOptions {
@@ -44,7 +50,8 @@ function fakeAnswer(req: LlmRequest): string {
   const lang = detectLanguage(req.system);
   const labels = answerLabels(lang);
   const qMatch = user.match(/## Detected question[^\n]*\n([^\n]+)/);
-  const question = qMatch?.[1]?.trim() ?? (lang === 'es' ? 'lo último que se dijo' : 'the last thing said');
+  const question =
+    qMatch?.[1]?.trim() ?? (lang === 'es' ? 'lo último que se dijo' : 'the last thing said');
   const kind = detectQuestionHeuristic(question).type;
   if (kind === 'coding') {
     return lang === 'es'
@@ -65,7 +72,12 @@ function fakeClassification(req: LlmRequest): string {
   const user = lastUserContent(req);
   const seg = user.match(/Last segment:\n([\s\S]*?)\n\nJSON:/)?.[1] ?? user;
   const h = detectQuestionHeuristic(seg);
-  return JSON.stringify({ isQuestion: h.isQuestion, question: h.question, type: h.type, needsAnswer: h.needsAnswer });
+  return JSON.stringify({
+    isQuestion: h.isQuestion,
+    question: h.question,
+    type: h.type,
+    needsAnswer: h.needsAnswer,
+  });
 }
 
 function fakeNotes(req: LlmRequest): string {
@@ -130,10 +142,16 @@ export class FakeLlmProvider implements LlmProvider {
       yield { type: 'delta', text: chunk };
       await sleep(this.opts.chunkDelayMs ?? 0, opts.signal);
     }
-    const inputTokens = estimateTokens(req.system) + req.messages.reduce((n, m) => n + estimateTokens(m.content), 0);
+    const inputTokens =
+      estimateTokens(req.system) + req.messages.reduce((n, m) => n + estimateTokens(m.content), 0);
     yield {
       type: 'done',
-      usage: { inputTokens, outputTokens: estimateTokens(text), cacheReadTokens: 0, cacheWriteTokens: 0 },
+      usage: {
+        inputTokens,
+        outputTokens: estimateTokens(text),
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+      },
       stopReason: 'end_turn',
       model: req.model,
     };

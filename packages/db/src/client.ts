@@ -8,7 +8,9 @@ const globalForPrisma = globalThis as unknown as { __callpilotPrisma?: PrismaCli
 
 export function createPrismaClient(connectionString = process.env.DATABASE_URL): PrismaClient {
   if (!connectionString) {
-    throw new Error('DATABASE_URL no está definida. Copia .env.example a .env en la raíz del repo.');
+    throw new Error(
+      'DATABASE_URL no está definida. Copia .env.example a .env en la raíz del repo.',
+    );
   }
   const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({ adapter });

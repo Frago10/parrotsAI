@@ -11,11 +11,15 @@ export interface WindowSegment {
 
 export class TranscriptWindow {
   private segments: WindowSegment[] = [];
-  constructor(private readonly maxAgeMs: number, private readonly maxSegments = 400) {}
+  constructor(
+    private readonly maxAgeMs: number,
+    private readonly maxSegments = 400,
+  ) {}
 
   push(seg: WindowSegment): void {
     this.segments.push(seg);
-    if (this.segments.length > this.maxSegments) this.segments.splice(0, this.segments.length - this.maxSegments);
+    if (this.segments.length > this.maxSegments)
+      this.segments.splice(0, this.segments.length - this.maxSegments);
   }
 
   /** Segmentos cuyo fin está dentro de la ventana respecto a `nowMs`. */

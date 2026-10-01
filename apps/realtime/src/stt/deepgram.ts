@@ -67,7 +67,9 @@ export class DeepgramSttProvider implements SttProvider {
         handlers.onUtteranceEnd();
       }
     });
-    connection.on('error', (err) => handlers.onError(err instanceof Error ? err : new Error(String(err))));
+    connection.on('error', (err) =>
+      handlers.onError(err instanceof Error ? err : new Error(String(err))),
+    );
     connection.on('close', () => {
       closed = true;
       clearInterval(keepalive);

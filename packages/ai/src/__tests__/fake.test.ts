@@ -9,7 +9,13 @@ describe('FakeLlmProvider', () => {
     const r = await fake.complete({
       model: 'fake-fast',
       system: 'Always answer in Spanish.',
-      messages: [{ role: 'user', content: '## Detected question (behavioral)\n¿Por qué quieres este puesto?\n\nDraft the answer.' }],
+      messages: [
+        {
+          role: 'user',
+          content:
+            '## Detected question (behavioral)\n¿Por qué quieres este puesto?\n\nDraft the answer.',
+        },
+      ],
       maxTokens: 500,
       purpose: 'answer',
     });
@@ -21,7 +27,13 @@ describe('FakeLlmProvider', () => {
     const r = await fake.complete({
       model: 'fake-fast',
       system: 'x',
-      messages: [{ role: 'user', content: 'Recent THEM transcript:\nhola\n\nLast segment:\n¿Cómo escalarías la base de datos?\n\nJSON:' }],
+      messages: [
+        {
+          role: 'user',
+          content:
+            'Recent THEM transcript:\nhola\n\nLast segment:\n¿Cómo escalarías la base de datos?\n\nJSON:',
+        },
+      ],
       maxTokens: 200,
       purpose: 'classify',
       json: true,
@@ -34,7 +46,13 @@ describe('FakeLlmProvider', () => {
     const slow = new FakeLlmProvider({ chunkDelayMs: 50 });
     const ac = new AbortController();
     const it = slow.stream(
-      { model: 'fake-fast', system: 's', messages: [{ role: 'user', content: 'q' }], maxTokens: 10, purpose: 'answer' },
+      {
+        model: 'fake-fast',
+        system: 's',
+        messages: [{ role: 'user', content: 'q' }],
+        maxTokens: 10,
+        purpose: 'answer',
+      },
       { signal: ac.signal },
     );
     const iterator = it[Symbol.asyncIterator]();

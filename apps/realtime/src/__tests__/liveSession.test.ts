@@ -70,12 +70,28 @@ describe('LiveSession (proveedores simulados)', () => {
   it('flujo completo: join -> transcripción -> pregunta -> respuesta -> end', async () => {
     const { session, sent, log } = setup();
     await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
-    expect(sent.find((m) => m.type === 'session.state')).toMatchObject({ state: 'LIVE', sttProvider: 'fake', llmProvider: 'fake' });
+    expect(sent.find((m) => m.type === 'session.state')).toMatchObject({
+      state: 'LIVE',
+      sttProvider: 'fake',
+      llmProvider: 'fake',
+    });
 
     session.handleBinary(encodeAudioFrame('them', new Int16Array(320)));
-    await session.handleText(JSON.stringify({ type: 'debug.transcript', channel: 'them', text: 'Hola, ¿me escuchas?', isFinal: true }));
     await session.handleText(
-      JSON.stringify({ type: 'debug.transcript', channel: 'them', text: '¿Cuánto tiempo tardarían en implementar el dashboard?', isFinal: true }),
+      JSON.stringify({
+        type: 'debug.transcript',
+        channel: 'them',
+        text: 'Hola, ¿me escuchas?',
+        isFinal: true,
+      }),
+    );
+    await session.handleText(
+      JSON.stringify({
+        type: 'debug.transcript',
+        channel: 'them',
+        text: '¿Cuánto tiempo tardarían en implementar el dashboard?',
+        isFinal: true,
+      }),
     );
     await waitFor(() => sent.some((m) => m.type === 'answer.done'));
 
@@ -105,7 +121,14 @@ describe('LiveSession (proveedores simulados)', () => {
   it('el botón Answer fuerza respuesta aunque no haya pregunta', async () => {
     const { session, sent } = setup();
     await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
-    await session.handleText(JSON.stringify({ type: 'debug.transcript', channel: 'them', text: 'Hoy revisamos el roadmap del trimestre.', isFinal: true }));
+    await session.handleText(
+      JSON.stringify({
+        type: 'debug.transcript',
+        channel: 'them',
+        text: 'Hoy revisamos el roadmap del trimestre.',
+        isFinal: true,
+      }),
+    );
     await session.handleText(JSON.stringify({ type: 'answer.request' }));
     await waitFor(() => sent.some((m) => m.type === 'answer.done'));
     const start = sent.find((m) => m.type === 'answer.start');
@@ -117,7 +140,14 @@ describe('LiveSession (proveedores simulados)', () => {
     const { session, sent } = setup();
     await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
     await session.handleText(JSON.stringify({ type: 'autoAnswer.set', enabled: false }));
-    await session.handleText(JSON.stringify({ type: 'debug.transcript', channel: 'them', text: '¿Cómo funciona la integración con su CRM?', isFinal: true }));
+    await session.handleText(
+      JSON.stringify({
+        type: 'debug.transcript',
+        channel: 'them',
+        text: '¿Cómo funciona la integración con su CRM?',
+        isFinal: true,
+      }),
+    );
     await waitFor(() => sent.some((m) => m.type === 'question.detected'));
     await new Promise((r) => setTimeout(r, 100));
     expect(sent.some((m) => m.type === 'answer.start')).toBe(false);

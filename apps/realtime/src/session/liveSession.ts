@@ -64,7 +64,11 @@ export class LiveSession {
   private lastHeartbeat = Date.now();
   private limitWarned = false;
   private tick: NodeJS.Timeout | null = null;
-  private metrics = { sttPartial: null as number | null, sttFinal: null as number | null, firstToken: null as number | null };
+  private metrics = {
+    sttPartial: null as number | null,
+    sttFinal: null as number | null,
+    firstToken: null as number | null,
+  };
   private autoAnswer = true;
   private language = 'es';
   private context!: SessionContext;
@@ -126,7 +130,12 @@ export class LiveSession {
       return;
     }
     if (!this.session) {
-      this.send({ type: 'error', code: 'not_joined', message: 'Primero envía session.join', fatal: true });
+      this.send({
+        type: 'error',
+        code: 'not_joined',
+        message: 'Primero envía session.join',
+        fatal: true,
+      });
       return;
     }
     if (this.ended && msg.type !== 'heartbeat') return;
@@ -184,17 +193,36 @@ export class LiveSession {
       case 'autoAnswer.set':
         this.autoAnswer = msg.enabled;
         this.logEv({ ev: 'user.action', action: 'autoAnswer', detail: String(msg.enabled) });
-        await this.deps.prisma?.callSession.update({ where: { id: this.session!.id }, data: { autoAnswer: msg.enabled } });
+        await this.deps.prisma?.callSession.update({
+          where: { id: this.session!.id },
+          data: { autoAnswer: msg.enabled },
+        });
         this.sendState();
         return;
       case 'feedback':
-        this.logEv({ ev: 'user.feedback', messageId: msg.messageId, value: msg.value, note: msg.note ?? null });
+        this.logEv({
+          ev: 'user.feedback',
+          messageId: msg.messageId,
+          value: msg.value,
+          note: msg.note ?? null,
+        });
         await this.deps.prisma?.aiMessage
           .update({ where: { id: msg.messageId }, data: { feedback: msg.value } })
           .catch(() => undefined);
         return;
       case 'debug.transcript':
-        this.ingest(msg.channel, msg.text, msg.isFinal, { startMs: this.elapsedMs() - 1500, endMs: this.elapsedMs(), confidence: null, language: null }, true);
+        this.ingest(
+          msg.channel,
+          msg.text,
+          msg.isFinal,
+          {
+            startMs: this.elapsedMs() - 1500,
+            endMs: this.elapsedMs(),
+            confidence: null,
+            language: null,
+          },
+          true,
+        );
         return;
     }
   }
@@ -202,10 +230,16 @@ export class LiveSession {
   // ---------- Ciclo de vida ----------
   private async join(sessionId: string): Promise<void> {
     if (this.session) {
-      this.send({ type: 'error', code: 'already_joined', message: 'La conexión ya tiene sesión', fatal: false });
+      this.send({
+        type: 'error',
+        code: 'already_joined',
+        message: 'La conexión ya tiene sesión',
+        fatal: false,
+      });
       return;
     }
-    const loader = this.deps.loadSessionOverride ?? ((id: string) => loadSession(this.deps.prisma!, id));
+    const loader =
+      this.deps.loadSessionOverride ?? ((id: string) => loadSession(this.deps.prisma!, id));
     const s = await loader(sessionId);
     if (!s) {
       this.send({ type: 'error', code: 'not_found', message: 'Sesión no encontrada', fatal: true });
@@ -235,8 +269,18 @@ export class LiveSession {
     } else {
       await this.deps.prisma?.callSession.update({ where: { id: s.id }, data: { state: 'LIVE' } });
       // Reconexión: recupera la transcripción previa para el contexto.
-      const prev = await this.deps.prisma?.transcriptSegment.findMany({ where: { sessionId: s.id }, orderBy: { startMs: 'asc' } });
-      for (const seg of prev ?? []) this.window.push({ id: seg.id, speaker: seg.speaker, text: seg.text, startMs: seg.startMs, endMs: seg.endMs });
+      const prev = await this.deps.prisma?.transcriptSegment.findMany({
+        where: { sessionId: s.id },
+        orderBy: { startMs: 'asc' },
+      });
+      for (const seg of prev ?? [])
+        this.window.push({
+          id: seg.id,
+          speaker: seg.speaker,
+          text: seg.text,
+          startMs: seg.startMs,
+          endMs: seg.endMs,
+        });
       const prevAnswers = await this.deps.prisma?.aiMessage.findMany({
         where: { sessionId: s.id, kind: { in: ['AUTO_ANSWER', 'MANUAL_ANSWER'] } },
         orderBy: { createdAt: 'asc' },
@@ -252,17 +296,47 @@ export class LiveSession {
       utteranceEndFallbackMs: cfg.utteranceEndFallbackMs,
       recentThem: () => TranscriptWindow.format(this.window.recentThem(this.elapsedMs())),
       onHeuristic: (text, h) =>
-        this.logEv({ ev: 'question.heuristic', text, isQuestion: h.isQuestion, needsAnswer: h.needsAnswer, qtype: h.type, score: h.score, reasons: h.reasons }),
+        this.logEv({
+          ev: 'question.heuristic',
+          text,
+          isQuestion: h.isQuestion,
+          needsAnswer: h.needsAnswer,
+          qtype: h.type,
+          score: h.score,
+          reasons: h.reasons,
+        }),
       onClassified: (q, latencyMs) =>
-        this.logEv({ ev: 'question.classified', isQuestion: true, needsAnswer: q.needsAnswer, qtype: q.qtype, question: q.question, latencyMs, model: this.llm!.classifierModelId }),
+        this.logEv({
+          ev: 'question.classified',
+          isQuestion: true,
+          needsAnswer: q.needsAnswer,
+          qtype: q.qtype,
+          question: q.question,
+          latencyMs,
+          model: this.llm!.classifierModelId,
+        }),
       onDetected: (q) => this.onQuestion(q),
       onError: (err) => this.deps.logger.warn({ err }, 'clasificador falló; se usa heurística'),
     });
 
     this.answerer = new Answerer(this.llm.provider, this.llm.modelId, () => this.context, {
       onStart: (job) => {
-        this.send({ type: 'answer.start', messageId: job.messageId, kind: job.kind, detectedQuestion: job.question, createdAt: new Date().toISOString(), model: this.llm!.modelId });
-        this.logEv({ ev: 'answer.start', messageId: job.messageId, kind: job.kind, question: job.question, model: this.llm!.modelId, promptTokensEstimate: null });
+        this.send({
+          type: 'answer.start',
+          messageId: job.messageId,
+          kind: job.kind,
+          detectedQuestion: job.question,
+          createdAt: new Date().toISOString(),
+          model: this.llm!.modelId,
+        });
+        this.logEv({
+          ev: 'answer.start',
+          messageId: job.messageId,
+          kind: job.kind,
+          question: job.question,
+          model: this.llm!.modelId,
+          promptTokensEstimate: null,
+        });
       },
       onFirstToken: (job, latencyMs) => {
         this.metrics.firstToken = latencyMs;
@@ -286,7 +360,16 @@ export class LiveSession {
           model: r.model,
           aborted: r.aborted,
         });
-        this.logEv({ ev: 'answer.done', messageId: job.messageId, latencyMs: r.latencyMs, tokensIn: r.usage.inputTokens, tokensOut: r.usage.outputTokens, cacheReadTokens: r.usage.cacheReadTokens, aborted: r.aborted, content: r.content });
+        this.logEv({
+          ev: 'answer.done',
+          messageId: job.messageId,
+          latencyMs: r.latencyMs,
+          tokensIn: r.usage.inputTokens,
+          tokensOut: r.usage.outputTokens,
+          cacheReadTokens: r.usage.cacheReadTokens,
+          aborted: r.aborted,
+          content: r.content,
+        });
         void this.persistAiMessage(job, r);
       },
       onError: (job, err) => {
@@ -305,7 +388,8 @@ export class LiveSession {
       llmProvider: this.llm.provider.id,
       autoAnswer: this.autoAnswer,
     });
-    if (this.llm.notice) this.send({ type: 'error', code: 'llm_notice', message: this.llm.notice, fatal: false });
+    if (this.llm.notice)
+      this.send({ type: 'error', code: 'llm_notice', message: this.llm.notice, fatal: false });
     this.sendState();
     await Promise.all([this.openStream('them'), this.openStream('me')]);
     this.tick = setInterval(() => this.onTick(), 1000);
@@ -363,7 +447,8 @@ export class LiveSession {
       const stream = await this.deps.stt.open(
         { language: this.language, sampleRate: AUDIO_SAMPLE_RATE, keyterms: this.session.keyterms },
         {
-          onPartial: (ev) => this.ingest(channel, ev.text, false, { ...ev, confidence: null, language: null }),
+          onPartial: (ev) =>
+            this.ingest(channel, ev.text, false, { ...ev, confidence: null, language: null }),
           onFinal: (ev) => this.ingest(channel, ev.text, true, ev),
           onUtteranceEnd: () => {
             this.logEv({ ev: 'utterance.end', channel });
@@ -371,7 +456,12 @@ export class LiveSession {
           },
           onError: (err) => {
             this.deps.logger.error({ err, channel }, 'error STT');
-            this.send({ type: 'error', code: 'stt_error', message: `STT (${channel}): ${err.message}`, fatal: false });
+            this.send({
+              type: 'error',
+              code: 'stt_error',
+              message: `STT (${channel}): ${err.message}`,
+              fatal: false,
+            });
           },
           onClose: () => {
             if (this.streams[channel]) delete this.streams[channel];
@@ -382,7 +472,12 @@ export class LiveSession {
       return stream;
     } catch (err) {
       this.deps.logger.error({ err, channel }, 'no se pudo abrir STT');
-      this.send({ type: 'error', code: 'stt_open_failed', message: `No se pudo abrir la transcripción (${channel})`, fatal: false });
+      this.send({
+        type: 'error',
+        code: 'stt_open_failed',
+        message: `No se pudo abrir la transcripción (${channel})`,
+        fatal: false,
+      });
       return null;
     }
   }
@@ -416,11 +511,39 @@ export class LiveSession {
     this.metrics.sttFinal = latency;
     const seg: WindowSegment = { id: randomUUID(), speaker, text, startMs, endMs };
     this.window.push(seg);
-    this.send({ type: 'transcript.final', segment: { ...seg, confidence: ev.confidence ?? undefined, language: ev.language ?? undefined } });
-    this.logEv({ ev: 'transcript.final', id: seg.id, channel, speaker, text, startMs, endMs, confidence: ev.confidence, sttLatencyMs: latency });
+    this.send({
+      type: 'transcript.final',
+      segment: {
+        ...seg,
+        confidence: ev.confidence ?? undefined,
+        language: ev.language ?? undefined,
+      },
+    });
+    this.logEv({
+      ev: 'transcript.final',
+      id: seg.id,
+      channel,
+      speaker,
+      text,
+      startMs,
+      endMs,
+      confidence: ev.confidence,
+      sttLatencyMs: latency,
+    });
     if (this.session.saveTranscript && this.deps.prisma) {
       void this.deps.prisma.transcriptSegment
-        .create({ data: { id: seg.id, sessionId: this.session.id, speaker, text, startMs, endMs, confidence: ev.confidence, language: ev.language } })
+        .create({
+          data: {
+            id: seg.id,
+            sessionId: this.session.id,
+            speaker,
+            text,
+            startMs,
+            endMs,
+            confidence: ev.confidence,
+            language: ev.language,
+          },
+        })
         .catch((err) => this.deps.logger.error({ err }, 'no se pudo guardar el segmento'));
     }
     if (channel === 'them') this.pipeline?.onFinalSegment(text);
@@ -429,8 +552,16 @@ export class LiveSession {
   // ---------- Preguntas y respuestas ----------
   private onQuestion(q: DetectedQuestion): void {
     this.lastDetected = q;
-    this.send({ type: 'question.detected', question: q.question, qtype: q.qtype, needsAnswer: q.needsAnswer, source: q.source, score: q.score });
-    if (q.needsAnswer && this.autoAnswer) this.startAnswer('AUTO_ANSWER', q.question, q.qtype, null);
+    this.send({
+      type: 'question.detected',
+      question: q.question,
+      qtype: q.qtype,
+      needsAnswer: q.needsAnswer,
+      source: q.source,
+      score: q.score,
+    });
+    if (q.needsAnswer && this.autoAnswer)
+      this.startAnswer('AUTO_ANSWER', q.question, q.qtype, null);
   }
 
   private forceAnswer(): void {
@@ -452,7 +583,12 @@ export class LiveSession {
   }
   private lastDetectedAt = 0;
 
-  private startAnswer(kind: AnswerJob['kind'], question: string | null, qtype: AnswerJob['qtype'], userInstruction: string | null): void {
+  private startAnswer(
+    kind: AnswerJob['kind'],
+    question: string | null,
+    qtype: AnswerJob['qtype'],
+    userInstruction: string | null,
+  ): void {
     if (!this.answerer) return;
     if (question) this.lastDetectedAt = this.elapsedMs();
     const now = this.elapsedMs();
@@ -461,7 +597,9 @@ export class LiveSession {
       kind,
       question,
       qtype,
-      recentTranscript: question ? this.window.formatRecent(now) : this.window.formatRecent(now, 45_000) || this.window.formatRecent(now),
+      recentTranscript: question
+        ? this.window.formatRecent(now)
+        : this.window.formatRecent(now, 45_000) || this.window.formatRecent(now),
       previousAnswers: [...this.previousAnswers],
       userInstruction,
     };
@@ -472,9 +610,24 @@ export class LiveSession {
     if (!this.session) return;
     const userMsgId = randomUUID();
     const createdAt = new Date();
-    this.send({ type: 'chat.user', messageId: userMsgId, text, createdAt: createdAt.toISOString() });
+    this.send({
+      type: 'chat.user',
+      messageId: userMsgId,
+      text,
+      createdAt: createdAt.toISOString(),
+    });
     await this.deps.prisma?.aiMessage
-      .create({ data: { id: userMsgId, sessionId: this.session.id, kind: 'CHAT_USER', content: text, model: '', sessionMs: this.elapsedMs(), createdAt } })
+      .create({
+        data: {
+          id: userMsgId,
+          sessionId: this.session.id,
+          kind: 'CHAT_USER',
+          content: text,
+          model: '',
+          sessionMs: this.elapsedMs(),
+          createdAt,
+        },
+      })
       .catch((err) => this.deps.logger.error({ err }, 'no se pudo guardar el chat'));
     const now = this.elapsedMs();
     const job: AnswerJob = {
@@ -489,7 +642,16 @@ export class LiveSession {
     void this.answerer?.run(job);
   }
 
-  private async persistAiMessage(job: AnswerJob, r: { content: string; latencyMs: number; firstTokenMs: number | null; usage: { inputTokens: number; outputTokens: number }; model: string }): Promise<void> {
+  private async persistAiMessage(
+    job: AnswerJob,
+    r: {
+      content: string;
+      latencyMs: number;
+      firstTokenMs: number | null;
+      usage: { inputTokens: number; outputTokens: number };
+      model: string;
+    },
+  ): Promise<void> {
     if (!this.session || !this.deps.prisma || !r.content.trim()) return;
     await this.deps.prisma.aiMessage
       .create({
@@ -516,7 +678,10 @@ export class LiveSession {
     this.language = language;
     this.context = { ...this.context, language };
     this.logEv({ ev: 'user.action', action: 'language', detail: language });
-    await this.deps.prisma?.callSession.update({ where: { id: this.session.id }, data: { language } });
+    await this.deps.prisma?.callSession.update({
+      where: { id: this.session.id },
+      data: { language },
+    });
     // Cambio en caliente: se reabren las conexiones STT con el nuevo idioma.
     await this.closeStreams();
     await Promise.all([this.openStream('them'), this.openStream('me')]);
@@ -544,16 +709,31 @@ export class LiveSession {
         await prisma.$transaction(async (tx) => {
           const user = await tx.user.findUnique({ where: { id: s.userId } });
           const trialLeft = Math.max(0, 600 - (user?.freeTrialUsedSeconds ?? 600));
-          const usedFreeTrial = user?.plan === 'FREE' && trialLeft > 0 && durationSeconds <= trialLeft;
+          const usedFreeTrial =
+            user?.plan === 'FREE' && trialLeft > 0 && durationSeconds <= trialLeft;
           await tx.callSession.update({
             where: { id: s.id },
-            data: { state: 'ENDED', endedAt: new Date(), durationSeconds, creditsUsed: usedFreeTrial ? 0 : credits, usedFreeTrial },
+            data: {
+              state: 'ENDED',
+              endedAt: new Date(),
+              durationSeconds,
+              creditsUsed: usedFreeTrial ? 0 : credits,
+              usedFreeTrial,
+            },
           });
           if (usedFreeTrial) {
-            await tx.user.update({ where: { id: s.userId }, data: { freeTrialUsedSeconds: { increment: durationSeconds } } });
+            await tx.user.update({
+              where: { id: s.userId },
+              data: { freeTrialUsedSeconds: { increment: durationSeconds } },
+            });
           } else if (credits > 0) {
-            await tx.user.update({ where: { id: s.userId }, data: { creditsBalance: { decrement: credits } } });
-            await tx.creditLedger.create({ data: { userId: s.userId, delta: -credits, reason: 'SESSION_USAGE', sessionId: s.id } });
+            await tx.user.update({
+              where: { id: s.userId },
+              data: { creditsBalance: { decrement: credits } },
+            });
+            await tx.creditLedger.create({
+              data: { userId: s.userId, delta: -credits, reason: 'SESSION_USAGE', sessionId: s.id },
+            });
           }
         });
       } catch (err) {
@@ -580,7 +760,12 @@ export class LiveSession {
         update: { ...notes, model, generatedAt: new Date() },
         create: { sessionId: this.session.id, ...notes, model },
       });
-      this.logEv({ ev: 'notes.generated', latencyMs: Date.now() - started, tokensIn: usage.inputTokens, tokensOut: usage.outputTokens });
+      this.logEv({
+        ev: 'notes.generated',
+        latencyMs: Date.now() - started,
+        tokensIn: usage.inputTokens,
+        tokensOut: usage.outputTokens,
+      });
       await this.log?.flush();
     } catch (err) {
       this.deps.logger.error({ err }, 'no se pudieron generar las notas');
@@ -599,7 +784,10 @@ export class LiveSession {
       this.baseMs = this.elapsedMs();
       this.resumedAt = null;
       await this.deps.prisma?.callSession
-        .update({ where: { id: this.session.id }, data: { durationSeconds: Math.round(this.baseMs / 1000) } })
+        .update({
+          where: { id: this.session.id },
+          data: { durationSeconds: Math.round(this.baseMs / 1000) },
+        })
         .catch(() => undefined);
     }
     await this.log?.flush();

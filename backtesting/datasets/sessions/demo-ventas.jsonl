@@ -1,0 +1,89 @@
+{"sessionId":"demo-ventas","t":0,"ev":"session.start","mode":"sales","language":"es","model":"claude-sonnet-4-5","sttProvider":"fake","llmProvider":"fake","autoAnswer":true}
+{"sessionId":"demo-ventas","t":4647,"ev":"transcript.final","id":"sv-001","channel":"them","speaker":"THEM","text":"Hola, buenos días, ¿me escuchas bien?","startMs":1800,"endMs":4330,"confidence":0.87,"sttLatencyMs":317}
+{"sessionId":"demo-ventas","t":4648,"ev":"question.heuristic","text":"Hola, buenos días, ¿me escuchas bien?","isQuestion":true,"needsAnswer":false,"qtype":"smalltalk","score":0.6,"reasons":["question_mark"]}
+{"sessionId":"demo-ventas","t":5067,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":5857,"ev":"question.classified","isQuestion":true,"needsAnswer":false,"qtype":"smalltalk","question":"¿me escuchas bien?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":10425,"ev":"transcript.final","id":"sv-002","channel":"me","speaker":"ME","text":"Sí, perfecto, te escucho muy bien. Gracias por tomarte el tiempo.","startMs":5641,"endMs":10071,"confidence":0.88,"sttLatencyMs":354}
+{"sessionId":"demo-ventas","t":10805,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":17174,"ev":"transcript.final","id":"sv-003","channel":"them","speaker":"THEM","text":"Bueno, cuéntame un poco qué hace exactamente CallPilot y para quién está pensado","startMs":11593,"endMs":16783,"confidence":0.89,"sttLatencyMs":391}
+{"sessionId":"demo-ventas","t":17175,"ev":"question.heuristic","text":"Bueno, cuéntame un poco qué hace exactamente CallPilot y para quién está pensado","isQuestion":true,"needsAnswer":true,"qtype":"other","score":0.65,"reasons":["request","interrogative_inside"]}
+{"sessionId":"demo-ventas","t":17594,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":18384,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"other","question":"Bueno, cuéntame un poco qué hace exactamente CallPilot y para quién está pensado","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":18392,"ev":"answer.start","messageId":"msg-sv-3","kind":"AUTO_ANSWER","question":"Bueno, cuéntame un poco qué hace exactamente CallPilot y para quién está pensado","model":"claude-sonnet-4-5","promptTokensEstimate":1460}
+{"sessionId":"demo-ventas","t":19032,"ev":"answer.first_token","messageId":"msg-sv-3","latencyMs":640}
+{"sessionId":"demo-ventas","t":20692,"ev":"answer.done","messageId":"msg-sv-3","latencyMs":2300,"tokensIn":1460,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** Bueno, cuéntame un poco qué hace exactamente CallPilot y para quién está pensado\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":29963,"ev":"transcript.final","id":"sv-004","channel":"me","speaker":"ME","text":"Claro. Es un copiloto que transcribe la llamada, detecta las preguntas de la otra parte y te sugiere respuestas en tiempo real.","startMs":20925,"endMs":29535,"confidence":0.9,"sttLatencyMs":428}
+{"sessionId":"demo-ventas","t":30343,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":35834,"ev":"transcript.final","id":"sv-005","channel":"them","speaker":"THEM","text":"¿Y cómo se integra con nuestro CRM? Nosotros usamos HubSpot.","startMs":31479,"endMs":35529,"confidence":0.91,"sttLatencyMs":305}
+{"sessionId":"demo-ventas","t":35835,"ev":"question.heuristic","text":"¿Y cómo se integra con nuestro CRM? Nosotros usamos HubSpot.","isQuestion":true,"needsAnswer":true,"qtype":"technical","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-ventas","t":36254,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":37044,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"technical","question":"¿Y cómo se integra con nuestro CRM?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":37052,"ev":"answer.start","messageId":"msg-sv-5","kind":"AUTO_ANSWER","question":"¿Y cómo se integra con nuestro CRM?","model":"claude-sonnet-4-5","promptTokensEstimate":1500}
+{"sessionId":"demo-ventas","t":37692,"ev":"answer.first_token","messageId":"msg-sv-5","latencyMs":640}
+{"sessionId":"demo-ventas","t":39352,"ev":"answer.done","messageId":"msg-sv-5","latencyMs":2300,"tokensIn":1500,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** ¿Y cómo se integra con nuestro CRM?\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":48199,"ev":"transcript.final","id":"sv-006","channel":"me","speaker":"ME","text":"Tenemos integración nativa con HubSpot: las notas y los siguientes pasos se guardan en el contacto al terminar la llamada.","startMs":40007,"endMs":47857,"confidence":0.92,"sttLatencyMs":342}
+{"sessionId":"demo-ventas","t":48579,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":49099,"ev":"user.feedback","messageId":"msg-sv-5","value":"up","note":null}
+{"sessionId":"demo-ventas","t":57312,"ev":"transcript.final","id":"sv-007","channel":"them","speaker":"THEM","text":"Entiendo. ¿Qué pasa con la privacidad de las grabaciones? Nuestro equipo legal es bastante estricto con eso.","startMs":50223,"endMs":56933,"confidence":0.93,"sttLatencyMs":379}
+{"sessionId":"demo-ventas","t":57313,"ev":"question.heuristic","text":"Entiendo. ¿Qué pasa con la privacidad de las grabaciones? Nuestro equipo legal es bastante estricto con eso.","isQuestion":true,"needsAnswer":true,"qtype":"other","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-ventas","t":57732,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":58522,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"other","question":"¿Qué pasa con la privacidad de las grabaciones?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":58530,"ev":"answer.start","messageId":"msg-sv-7","kind":"AUTO_ANSWER","question":"¿Qué pasa con la privacidad de las grabaciones?","model":"claude-sonnet-4-5","promptTokensEstimate":1540}
+{"sessionId":"demo-ventas","t":59170,"ev":"answer.first_token","messageId":"msg-sv-7","latencyMs":640}
+{"sessionId":"demo-ventas","t":60830,"ev":"answer.done","messageId":"msg-sv-7","latencyMs":2300,"tokensIn":1540,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** ¿Qué pasa con la privacidad de las grabaciones?\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":66873,"ev":"transcript.final","id":"sv-008","channel":"me","speaker":"ME","text":"El audio no se guarda nunca; solo la transcripción, y se puede desactivar por sesión.","startMs":60507,"endMs":66457,"confidence":0.94,"sttLatencyMs":416}
+{"sessionId":"demo-ventas","t":67253,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":73708,"ev":"transcript.final","id":"sv-009","channel":"them","speaker":"THEM","text":"Vale. La verdad es que me parece caro comparado con lo que pagamos ahora.","startMs":67845,"endMs":73415,"confidence":0.95,"sttLatencyMs":293}
+{"sessionId":"demo-ventas","t":73709,"ev":"question.heuristic","text":"Vale. La verdad es que me parece caro comparado con lo que pagamos ahora.","isQuestion":true,"needsAnswer":true,"qtype":"objection","score":0.7,"reasons":["objection"]}
+{"sessionId":"demo-ventas","t":74128,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":74918,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"objection","question":"La verdad es que me parece caro comparado con lo que pagamos ahora.","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":74926,"ev":"answer.start","messageId":"msg-sv-9","kind":"AUTO_ANSWER","question":"La verdad es que me parece caro comparado con lo que pagamos ahora.","model":"claude-sonnet-4-5","promptTokensEstimate":1580}
+{"sessionId":"demo-ventas","t":75566,"ev":"answer.first_token","messageId":"msg-sv-9","latencyMs":640}
+{"sessionId":"demo-ventas","t":77226,"ev":"answer.done","messageId":"msg-sv-9","latencyMs":2300,"tokensIn":1580,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** La verdad es que me parece caro comparado con lo que pagamos ahora.\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":84365,"ev":"transcript.final","id":"sv-010","channel":"me","speaker":"ME","text":"Lo entiendo. Comparemos el costo con el tiempo que hoy pierde el equipo escribiendo notas a mano.","startMs":77325,"endMs":84035,"confidence":0.96,"sttLatencyMs":330}
+{"sessionId":"demo-ventas","t":84745,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":85265,"ev":"user.feedback","messageId":"msg-sv-9","value":"down","note":"demasiado genérica"}
+{"sessionId":"demo-ventas","t":90642,"ev":"transcript.final","id":"sv-011","channel":"them","speaker":"THEM","text":"Y el precio que mencionaste es por usuario al mes, ¿verdad?","startMs":85845,"endMs":90275,"confidence":0.97,"sttLatencyMs":367}
+{"sessionId":"demo-ventas","t":90643,"ev":"question.heuristic","text":"Y el precio que mencionaste es por usuario al mes, ¿verdad?","isQuestion":true,"needsAnswer":true,"qtype":"clarification","score":0.9,"reasons":["question_mark","tag_question"]}
+{"sessionId":"demo-ventas","t":91062,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":91852,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"clarification","question":"Y el precio que mencionaste es por usuario al mes, ¿verdad?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":91860,"ev":"answer.start","messageId":"msg-sv-11","kind":"AUTO_ANSWER","question":"Y el precio que mencionaste es por usuario al mes, ¿verdad?","model":"claude-sonnet-4-5","promptTokensEstimate":1620}
+{"sessionId":"demo-ventas","t":92500,"ev":"answer.first_token","messageId":"msg-sv-11","latencyMs":640}
+{"sessionId":"demo-ventas","t":94160,"ev":"answer.done","messageId":"msg-sv-11","latencyMs":2300,"tokensIn":1620,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** Y el precio que mencionaste es por usuario al mes, ¿verdad?\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":100655,"ev":"transcript.final","id":"sv-012","channel":"me","speaker":"ME","text":"Exacto, por usuario activo al mes, y el plan anual tiene dos meses gratis.","startMs":94681,"endMs":100251,"confidence":0.86,"sttLatencyMs":404}
+{"sessionId":"demo-ventas","t":101035,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":107574,"ev":"transcript.final","id":"sv-013","channel":"them","speaker":"THEM","text":"Ok. Lo tengo que consultar con mi jefe antes de decidir nada.","startMs":102483,"endMs":107293,"confidence":0.87,"sttLatencyMs":281}
+{"sessionId":"demo-ventas","t":107575,"ev":"question.heuristic","text":"Ok. Lo tengo que consultar con mi jefe antes de decidir nada.","isQuestion":true,"needsAnswer":true,"qtype":"objection","score":0.7,"reasons":["objection"]}
+{"sessionId":"demo-ventas","t":107994,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":108784,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"objection","question":"Lo tengo que consultar con mi jefe antes de decidir nada.","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":108792,"ev":"answer.start","messageId":"msg-sv-13","kind":"AUTO_ANSWER","question":"Lo tengo que consultar con mi jefe antes de decidir nada.","model":"claude-sonnet-4-5","promptTokensEstimate":1660}
+{"sessionId":"demo-ventas","t":109432,"ev":"answer.first_token","messageId":"msg-sv-13","latencyMs":640}
+{"sessionId":"demo-ventas","t":111092,"ev":"answer.done","messageId":"msg-sv-13","latencyMs":2300,"tokensIn":1660,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** Lo tengo que consultar con mi jefe antes de decidir nada.\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":118683,"ev":"transcript.final","id":"sv-014","channel":"me","speaker":"ME","text":"Por supuesto. Si te parece, te preparo un resumen de una página para que lo compartas.","startMs":112035,"endMs":118365,"confidence":0.88,"sttLatencyMs":318}
+{"sessionId":"demo-ventas","t":119063,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":125164,"ev":"transcript.final","id":"sv-015","channel":"them","speaker":"THEM","text":"Nosotros ahora mismo tenemos unos cuarenta vendedores y la mitad trabaja en remoto.","startMs":119619,"endMs":124809,"confidence":0.89,"sttLatencyMs":355}
+{"sessionId":"demo-ventas","t":125165,"ev":"question.heuristic","text":"Nosotros ahora mismo tenemos unos cuarenta vendedores y la mitad trabaja en remoto.","isQuestion":false,"needsAnswer":false,"qtype":"other","score":0,"reasons":[]}
+{"sessionId":"demo-ventas","t":125584,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":127484,"ev":"user.action","action":"answer","detail":null}
+{"sessionId":"demo-ventas","t":127490,"ev":"answer.start","messageId":"msg-sv-15-manual","kind":"MANUAL_ANSWER","question":null,"model":"claude-sonnet-4-5","promptTokensEstimate":1500}
+{"sessionId":"demo-ventas","t":128190,"ev":"answer.first_token","messageId":"msg-sv-15-manual","latencyMs":700}
+{"sessionId":"demo-ventas","t":129590,"ev":"answer.done","messageId":"msg-sv-15-manual","latencyMs":2100,"tokensIn":1500,"tokensOut":80,"cacheReadTokens":1100,"aborted":false,"content":"⭐ **Respuesta:** (manual, simulada) Comentario sugerido sobre lo último que se dijo."}
+{"sessionId":"demo-ventas","t":137357,"ev":"transcript.final","id":"sv-016","channel":"me","speaker":"ME","text":"Perfecto, con equipos remotos es donde más se nota, porque todos tienen las mismas respuestas a mano.","startMs":130255,"endMs":136965,"confidence":0.9,"sttLatencyMs":392}
+{"sessionId":"demo-ventas","t":137737,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":143880,"ev":"transcript.final","id":"sv-017","channel":"them","speaker":"THEM","text":"¿Podrías mandarme una propuesta con los dos planes para presentarla al comité?","startMs":138641,"endMs":143451,"confidence":0.91,"sttLatencyMs":429}
+{"sessionId":"demo-ventas","t":143881,"ev":"question.heuristic","text":"¿Podrías mandarme una propuesta con los dos planes para presentarla al comité?","isQuestion":true,"needsAnswer":true,"qtype":"technical","score":1,"reasons":["question_mark","modal_start"]}
+{"sessionId":"demo-ventas","t":144300,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":145090,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"technical","question":"¿Podrías mandarme una propuesta con los dos planes para presentarla al comité?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-ventas","t":145098,"ev":"answer.start","messageId":"msg-sv-17","kind":"AUTO_ANSWER","question":"¿Podrías mandarme una propuesta con los dos planes para presentarla al comité?","model":"claude-sonnet-4-5","promptTokensEstimate":1740}
+{"sessionId":"demo-ventas","t":145738,"ev":"answer.first_token","messageId":"msg-sv-17","latencyMs":640}
+{"sessionId":"demo-ventas","t":147398,"ev":"answer.done","messageId":"msg-sv-17","latencyMs":2300,"tokensIn":1740,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Pregunta:** ¿Podrías mandarme una propuesta con los dos planes para presentarla al comité?\n⭐ **Respuesta:** Respuesta sugerida (simulada) con la idea central primero y un ejemplo concreto."}
+{"sessionId":"demo-ventas","t":154801,"ev":"transcript.final","id":"sv-018","channel":"me","speaker":"ME","text":"Sí, te la envío hoy mismo con los dos planes y el caso de un cliente parecido.","startMs":147785,"endMs":154495,"confidence":0.92,"sttLatencyMs":306}
+{"sessionId":"demo-ventas","t":155181,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":160226,"ev":"transcript.final","id":"sv-019","channel":"them","speaker":"THEM","text":"Perfecto, muchas gracias, hablamos la semana que viene.","startMs":156593,"endMs":159883,"confidence":0.93,"sttLatencyMs":343}
+{"sessionId":"demo-ventas","t":160227,"ev":"question.heuristic","text":"Perfecto, muchas gracias, hablamos la semana que viene.","isQuestion":false,"needsAnswer":false,"qtype":"other","score":0,"reasons":[]}
+{"sessionId":"demo-ventas","t":160646,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-ventas","t":164722,"ev":"transcript.final","id":"sv-020","channel":"me","speaker":"ME","text":"Gracias a ti, hasta luego.","startMs":162192,"endMs":164342,"confidence":0.94,"sttLatencyMs":380}
+{"sessionId":"demo-ventas","t":165102,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-ventas","t":165962,"ev":"user.action","action":"end","detail":null}
+{"sessionId":"demo-ventas","t":168062,"ev":"notes.generated","latencyMs":2100,"tokensIn":5200,"tokensOut":420}
+{"sessionId":"demo-ventas","t":168162,"ev":"session.end","durationMs":168162,"reason":"user"}

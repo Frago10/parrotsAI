@@ -1,0 +1,18 @@
+{"ev":"session.start","mode":"REGULAR","language":"es","model":"fake-fast","sttProvider":"fake","llmProvider":"fake","autoAnswer":true,"t":25,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"transcript.final","id":"6a8c0a72-02de-419a-90e2-173e3ef40027","channel":"them","speaker":"THEM","text":"Hola, ¿me escuchas bien?","startMs":0,"endMs":44,"confidence":null,"sttLatencyMs":1,"t":47,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"question.heuristic","text":"Hola, ¿me escuchas bien?","isQuestion":true,"needsAnswer":false,"qtype":"smalltalk","score":0.6,"reasons":["question_mark"],"t":60,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"transcript.final","id":"cfa28605-d80a-4b09-a796-352101245be8","channel":"them","speaker":"THEM","text":"¿Cuánto tiempo tardarían en implementar el dashboard de ventas?","startMs":0,"endMs":257,"confidence":null,"sttLatencyMs":0,"t":258,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"question.heuristic","text":"¿Cuánto tiempo tardarían en implementar el dashboard de ventas?","isQuestion":true,"needsAnswer":true,"qtype":"coding","score":1.1,"reasons":["question_mark","interrogative_start"],"t":262,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"coding","question":"¿Cuánto tiempo tardarían en implementar el dashboard de ventas?","latencyMs":264,"model":"fake-fast","t":2030,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.start","messageId":"79767f2e-7491-4c7d-a01f-dbc655cb1c9d","kind":"AUTO_ANSWER","question":"¿Cuánto tiempo tardarían en implementar el dashboard de ventas?","model":"fake-fast","promptTokensEstimate":null,"t":2034,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.first_token","messageId":"79767f2e-7491-4c7d-a01f-dbc655cb1c9d","latencyMs":254,"t":2286,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"user.action","action":"answer","detail":null,"t":2806,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.start","messageId":"fbdaeff2-8632-4dc2-b29b-b772d579da9a","kind":"MANUAL_ANSWER","question":"¿Cuánto tiempo tardarían en implementar el dashboard de ventas?","model":"fake-fast","promptTokensEstimate":null,"t":2807,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.done","messageId":"79767f2e-7491-4c7d-a01f-dbc655cb1c9d","latencyMs":777,"tokensIn":0,"tokensOut":0,"cacheReadTokens":0,"aborted":true,"content":"💬 **Pregunta:** ¿Cuánto tiempo tardarían en implementar el dashboard de ventas?\n⭐ **Respuesta:** Recorro la entrada una sola vez y uso un diccionario para los complementos.\n```python\ndef solve(items):\n    seen = {}\n    for i, ","t":2811,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"user.action","action":"chat","detail":"hazlo más corto","t":2883,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.start","messageId":"e80571cb-aeb1-4e3e-986b-2b50cb7fe237","kind":"CHAT_AI","question":null,"model":"fake-fast","promptTokensEstimate":null,"t":2889,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.done","messageId":"fbdaeff2-8632-4dc2-b29b-b772d579da9a","latencyMs":82,"tokensIn":0,"tokensOut":0,"cacheReadTokens":0,"aborted":true,"content":"","t":2889,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"user.action","action":"end","detail":null,"t":2958,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"answer.done","messageId":"e80571cb-aeb1-4e3e-986b-2b50cb7fe237","latencyMs":70,"tokensIn":0,"tokensOut":0,"cacheReadTokens":0,"aborted":true,"content":"","t":2958,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"session.end","durationMs":2958,"reason":"user","t":2958,"sessionId":"cmuput4rh0000rf7dad34ra33"}
+{"ev":"notes.generated","latencyMs":289,"tokensIn":258,"tokensOut":124,"t":2958,"sessionId":"cmuput4rh0000rf7dad34ra33"}

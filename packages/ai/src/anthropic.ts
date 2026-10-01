@@ -1,6 +1,12 @@
 // Proveedor Anthropic (Claude) con streaming y prompt caching del system prompt.
 import Anthropic from '@anthropic-ai/sdk';
-import type { LlmCallOptions, LlmCompletion, LlmProvider, LlmRequest, LlmStreamEvent } from './types';
+import type {
+  LlmCallOptions,
+  LlmCompletion,
+  LlmProvider,
+  LlmRequest,
+  LlmStreamEvent,
+} from './types';
 import { collectStream } from './types';
 
 export interface AnthropicProviderOptions {
@@ -65,6 +71,6 @@ export class AnthropicProvider implements LlmProvider {
 export function isAbortError(err: unknown): boolean {
   return (
     (err instanceof Error && err.name === 'AbortError') ||
-    (err instanceof Anthropic.APIUserAbortError)
+    err instanceof Anthropic.APIUserAbortError
   );
 }

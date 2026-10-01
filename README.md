@@ -36,15 +36,15 @@ flowchart LR
 
 ## Estructura
 
-| Carpeta | Contenido |
-|---|---|
-| `apps/web` | Next.js 16: workspace, lista de sesiones, pantalla en vivo, vista post-llamada |
-| `apps/realtime` | Servidor WebSocket: audio -> STT -> detección de preguntas -> respuesta -> notas |
+| Carpeta           | Contenido                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| `apps/web`        | Next.js 16: workspace, lista de sesiones, pantalla en vivo, vista post-llamada        |
+| `apps/realtime`   | Servidor WebSocket: audio -> STT -> detección de preguntas -> respuesta -> notas      |
 | `packages/shared` | Protocolo WS (Zod), heurística de preguntas, prompts versionados, catálogo de modelos |
-| `packages/ai` | Interfaz `LlmProvider` con implementación Anthropic y simulador determinista |
-| `packages/db` | Prisma 7 + Postgres: schema, migraciones, seed |
-| `backtesting` | Dataset etiquetado es/en, runner de métricas y replay de sesiones JSONL |
-| `docs` | Revisión del proyecto y plan de backtesting |
+| `packages/ai`     | Interfaz `LlmProvider` con implementación Anthropic y simulador determinista          |
+| `packages/db`     | Prisma 7 + Postgres: schema, migraciones, seed                                        |
+| `backtesting`     | Dataset etiquetado es/en, runner de métricas y replay de sesiones JSONL               |
+| `docs`            | Revisión del proyecto y plan de backtesting                                           |
 
 ## Puesta en marcha
 

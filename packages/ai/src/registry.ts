@@ -25,7 +25,12 @@ export function getProvider(id: LlmProviderId, fakeOpts?: FakeProviderOptions): 
       p = new AnthropicProvider();
       break;
     case 'fake':
-      p = new FakeLlmProvider(fakeOpts ?? { chunkDelayMs: Number(process.env.FAKE_LLM_CHUNK_DELAY_MS ?? 12), firstTokenDelayMs: Number(process.env.FAKE_LLM_FIRST_TOKEN_MS ?? 250) });
+      p = new FakeLlmProvider(
+        fakeOpts ?? {
+          chunkDelayMs: Number(process.env.FAKE_LLM_CHUNK_DELAY_MS ?? 12),
+          firstTokenDelayMs: Number(process.env.FAKE_LLM_FIRST_TOKEN_MS ?? 250),
+        },
+      );
       break;
     default:
       throw new Error(`Proveedor LLM no implementado todavía: ${id}`);
@@ -35,7 +40,10 @@ export function getProvider(id: LlmProviderId, fakeOpts?: FakeProviderOptions): 
 }
 
 /** Resuelve el proveedor para el modelo pedido, degradando al simulador si falta la clave. */
-export function resolveProviderForModel(requestedModelId: string, env: NodeJS.ProcessEnv = process.env): ProviderResolution {
+export function resolveProviderForModel(
+  requestedModelId: string,
+  env: NodeJS.ProcessEnv = process.env,
+): ProviderResolution {
   const { model, migratedFrom } = resolveModel(requestedModelId);
   const notices: string[] = [];
   if (migratedFrom) notices.push(`El modelo ${migratedFrom} fue retirado; se usa ${model.label}.`);
@@ -49,11 +57,21 @@ export function resolveProviderForModel(requestedModelId: string, env: NodeJS.Pr
           : `Falta ${model.requiresEnv}: se usa el simulador en lugar de ${model.label}.`,
       );
     }
-    return { provider: getProvider('fake'), modelId: 'fake-fast', classifierModelId: 'fake-fast', notice: notices.join(' ') || null };
+    return {
+      provider: getProvider('fake'),
+      modelId: 'fake-fast',
+      classifierModelId: 'fake-fast',
+      notice: notices.join(' ') || null,
+    };
   }
   if (model.provider === 'openai' || model.provider === 'google') {
     notices.push(`${model.label} todavía no está implementado; se usa el simulador.`);
-    return { provider: getProvider('fake'), modelId: 'fake-fast', classifierModelId: 'fake-fast', notice: notices.join(' ') };
+    return {
+      provider: getProvider('fake'),
+      modelId: 'fake-fast',
+      classifierModelId: 'fake-fast',
+      notice: notices.join(' '),
+    };
   }
   const classifier = findModel(model.classifierModel) ?? model;
   return {

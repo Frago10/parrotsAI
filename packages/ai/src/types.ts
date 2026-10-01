@@ -51,7 +51,12 @@ export interface LlmProvider {
   complete(req: LlmRequest, opts?: LlmCallOptions): Promise<LlmCompletion>;
 }
 
-export const EMPTY_USAGE: LlmUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
+export const EMPTY_USAGE: LlmUsage = {
+  inputTokens: 0,
+  outputTokens: 0,
+  cacheReadTokens: 0,
+  cacheWriteTokens: 0,
+};
 
 /** Implementa complete() a partir de stream() para proveedores que solo definen stream. */
 export async function collectStream(

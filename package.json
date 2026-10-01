@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "description": "CallPilot: copiloto de IA en tiempo real para llamadas (transcripción, detección de preguntas, respuestas sugeridas y notas).",
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",

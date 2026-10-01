@@ -1,5 +1,9 @@
 // Generación de notas post-llamada. Transcripciones largas: map-reduce por bloques de 10 min.
-import { buildNotesUserPrompt, NOTES_CHUNK_SYSTEM_PROMPT, NOTES_SYSTEM_PROMPT } from '@callpilot/shared';
+import {
+  buildNotesUserPrompt,
+  NOTES_CHUNK_SYSTEM_PROMPT,
+  NOTES_SYSTEM_PROMPT,
+} from '@callpilot/shared';
 import { extractJson, type LlmProvider, type LlmUsage } from '@callpilot/ai';
 import { z } from 'zod';
 import { TranscriptWindow, type WindowSegment } from './transcriptWindow';
@@ -10,7 +14,13 @@ export const CallNotesSchema = z.object({
   questions: z.array(z.string()).default([]),
   nextSteps: z.array(z.string()).default([]),
   actionItems: z
-    .array(z.object({ owner: z.string().default(''), task: z.string(), due: z.string().nullable().default(null) }))
+    .array(
+      z.object({
+        owner: z.string().default(''),
+        task: z.string(),
+        due: z.string().nullable().default(null),
+      }),
+    )
     .default([]),
   decisions: z.array(z.string()).default([]),
   risks: z.array(z.string()).default([]),
@@ -42,7 +52,12 @@ export async function generateNotes(
   model: string,
   input: GenerateNotesInput,
 ): Promise<{ notes: CallNotesJson; usage: LlmUsage; model: string }> {
-  let usage: LlmUsage = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0 };
+  let usage: LlmUsage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+  };
   let transcript = TranscriptWindow.format(input.segments);
   if (transcript.length > MAX_DIRECT_CHARS) {
     // Map: resumen por bloque de 10 minutos. Reduce: notas finales a partir de los resúmenes.
@@ -57,7 +72,12 @@ export async function generateNotes(
       const res = await llm.complete({
         model,
         system: NOTES_CHUNK_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: `Block ${i + 1} (minutes ${i * 10}-${i * 10 + 10}):\n${TranscriptWindow.format(block)}` }],
+        messages: [
+          {
+            role: 'user',
+            content: `Block ${i + 1} (minutes ${i * 10}-${i * 10 + 10}):\n${TranscriptWindow.format(block)}`,
+          },
+        ],
         maxTokens: 600,
         purpose: 'notes_chunk',
       });
@@ -87,6 +107,8 @@ export async function generateNotes(
   });
   usage = addUsage(usage, res.usage);
   const parsed = CallNotesSchema.safeParse(extractJson(res.text) ?? {});
-  const notes = parsed.success ? parsed.data : CallNotesSchema.parse({ summary: res.text.slice(0, 2000) });
+  const notes = parsed.success
+    ? parsed.data
+    : CallNotesSchema.parse({ summary: res.text.slice(0, 2000) });
   return { notes, usage, model: res.model };
 }

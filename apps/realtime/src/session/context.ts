@@ -22,7 +22,10 @@ export interface LoadedSession {
   remainingSeconds: number | null;
 }
 
-export async function loadSession(prisma: PrismaClient, sessionId: string): Promise<LoadedSession | null> {
+export async function loadSession(
+  prisma: PrismaClient,
+  sessionId: string,
+): Promise<LoadedSession | null> {
   const s = await prisma.callSession.findUnique({
     where: { id: sessionId },
     include: {
@@ -32,7 +35,8 @@ export async function loadSession(prisma: PrismaClient, sessionId: string): Prom
     },
   });
   if (!s) return null;
-  const resumeText = s.mode === 'INTERVIEW' ? (s.resume?.parsedText ?? null) : (s.resume?.parsedText ?? null);
+  const resumeText =
+    s.mode === 'INTERVIEW' ? (s.resume?.parsedText ?? null) : (s.resume?.parsedText ?? null);
   // Sin RAG todavía (fase 7): se inyecta el texto completo de documentos cortos (hasta ~6k caracteres).
   const documentSnippets: string[] = [];
   let budget = 6000;
@@ -53,7 +57,9 @@ export async function loadSession(prisma: PrismaClient, sessionId: string): Prom
   const unlimited = s.user.plan !== 'FREE';
   const creditsSeconds = Number(s.user.creditsBalance) * 3600;
   const trialLeft = Math.max(0, 600 - s.user.freeTrialUsedSeconds);
-  const remainingSeconds = unlimited ? null : Math.max(0, Math.floor(creditsSeconds + trialLeft - s.durationSeconds));
+  const remainingSeconds = unlimited
+    ? null
+    : Math.max(0, Math.floor(creditsSeconds + trialLeft - s.durationSeconds));
 
   return {
     id: s.id,
