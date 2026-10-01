@@ -1,0 +1,99 @@
+{"sessionId":"demo-entrevista","t":0,"ev":"session.start","mode":"interview","language":"en","model":"claude-sonnet-4-5","sttProvider":"fake","llmProvider":"fake","autoAnswer":true}
+{"sessionId":"demo-entrevista","t":4407,"ev":"transcript.final","id":"si-001","channel":"them","speaker":"THEM","text":"Hi, can you hear me okay?","startMs":1800,"endMs":4090,"confidence":0.87,"sttLatencyMs":317}
+{"sessionId":"demo-entrevista","t":4408,"ev":"question.heuristic","text":"Hi, can you hear me okay?","isQuestion":true,"needsAnswer":false,"qtype":"smalltalk","score":0.9,"reasons":["question_mark","tag_question"]}
+{"sessionId":"demo-entrevista","t":4827,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":5617,"ev":"question.classified","isQuestion":true,"needsAnswer":false,"qtype":"smalltalk","question":"Hi, can you hear me okay?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":8725,"ev":"transcript.final","id":"si-002","channel":"me","speaker":"ME","text":"Yes, loud and clear, thanks for having me.","startMs":5401,"endMs":8371,"confidence":0.88,"sttLatencyMs":354}
+{"sessionId":"demo-entrevista","t":9105,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":15294,"ev":"transcript.final","id":"si-003","channel":"them","speaker":"THEM","text":"Great. So, um, to start, tell me a bit about yourself and your background","startMs":9893,"endMs":14903,"confidence":0.89,"sttLatencyMs":391}
+{"sessionId":"demo-entrevista","t":15295,"ev":"question.heuristic","text":"Great. So, um, to start, tell me a bit about yourself and your background","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","score":0.45,"reasons":["request"]}
+{"sessionId":"demo-entrevista","t":15714,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":16504,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","question":"So, um, to start, tell me a bit about yourself and your background","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":16512,"ev":"answer.start","messageId":"msg-si-3","kind":"AUTO_ANSWER","question":"So, um, to start, tell me a bit about yourself and your background","model":"claude-sonnet-4-5","promptTokensEstimate":1460}
+{"sessionId":"demo-entrevista","t":17152,"ev":"answer.first_token","messageId":"msg-si-3","latencyMs":640}
+{"sessionId":"demo-entrevista","t":18812,"ev":"answer.done","messageId":"msg-si-3","latencyMs":2300,"tokensIn":1460,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** So, um, to start, tell me a bit about yourself and your background\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":25503,"ev":"transcript.final","id":"si-004","channel":"me","speaker":"ME","text":"Sure. I am a backend engineer with six years of experience, mostly in payments and data pipelines.","startMs":19045,"endMs":25075,"confidence":0.9,"sttLatencyMs":428}
+{"sessionId":"demo-entrevista","t":25883,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":33694,"ev":"transcript.final","id":"si-005","channel":"them","speaker":"THEM","text":"Nice. Tell me about a time you had a conflict with a teammate and how you handled it.","startMs":27019,"endMs":33389,"confidence":0.91,"sttLatencyMs":305}
+{"sessionId":"demo-entrevista","t":33695,"ev":"question.heuristic","text":"Nice. Tell me about a time you had a conflict with a teammate and how you handled it.","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","score":0.65,"reasons":["request","interrogative_inside"]}
+{"sessionId":"demo-entrevista","t":34114,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":34904,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","question":"Tell me about a time you had a conflict with a teammate and how you handled it.","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":34912,"ev":"answer.start","messageId":"msg-si-5","kind":"AUTO_ANSWER","question":"Tell me about a time you had a conflict with a teammate and how you handled it.","model":"claude-sonnet-4-5","promptTokensEstimate":1500}
+{"sessionId":"demo-entrevista","t":35552,"ev":"answer.first_token","messageId":"msg-si-5","latencyMs":640}
+{"sessionId":"demo-entrevista","t":37212,"ev":"answer.done","messageId":"msg-si-5","latencyMs":2300,"tokensIn":1500,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** Tell me about a time you had a conflict with a teammate and how you handled it.\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":46279,"ev":"transcript.final","id":"si-006","channel":"me","speaker":"ME","text":"We disagreed on a migration plan; I set up a short spike for both options and we picked the one with the data.","startMs":37867,"endMs":45937,"confidence":0.92,"sttLatencyMs":342}
+{"sessionId":"demo-entrevista","t":46659,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":47179,"ev":"user.feedback","messageId":"msg-si-5","value":"up","note":null}
+{"sessionId":"demo-entrevista","t":54372,"ev":"transcript.final","id":"si-007","channel":"them","speaker":"THEM","text":"Okay, let's switch to something more technical. What's the difference between a process and a thread?","startMs":48303,"endMs":53993,"confidence":0.93,"sttLatencyMs":379}
+{"sessionId":"demo-entrevista","t":54373,"ev":"question.heuristic","text":"Okay, let's switch to something more technical. What's the difference between a process and a thread?","isQuestion":true,"needsAnswer":true,"qtype":"technical","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-entrevista","t":54792,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":55582,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"technical","question":"What's the difference between a process and a thread?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":55590,"ev":"answer.start","messageId":"msg-si-7","kind":"AUTO_ANSWER","question":"What's the difference between a process and a thread?","model":"claude-sonnet-4-5","promptTokensEstimate":1540}
+{"sessionId":"demo-entrevista","t":56230,"ev":"answer.first_token","messageId":"msg-si-7","latencyMs":640}
+{"sessionId":"demo-entrevista","t":57890,"ev":"answer.done","messageId":"msg-si-7","latencyMs":2300,"tokensIn":1540,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** What's the difference between a process and a thread?\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":65033,"ev":"transcript.final","id":"si-008","channel":"me","speaker":"ME","text":"A process has its own memory space; threads share memory within a process, which makes them cheaper but needs synchronization.","startMs":57567,"endMs":64617,"confidence":0.94,"sttLatencyMs":416}
+{"sessionId":"demo-entrevista","t":65413,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":70628,"ev":"transcript.final","id":"si-009","channel":"them","speaker":"THEM","text":"And how would you design a rate limiter for a public API?","startMs":66005,"endMs":70335,"confidence":0.95,"sttLatencyMs":293}
+{"sessionId":"demo-entrevista","t":70629,"ev":"question.heuristic","text":"And how would you design a rate limiter for a public API?","isQuestion":true,"needsAnswer":true,"qtype":"technical","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-entrevista","t":71048,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":71838,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"technical","question":"And how would you design a rate limiter for a public API?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":71846,"ev":"answer.start","messageId":"msg-si-9","kind":"AUTO_ANSWER","question":"And how would you design a rate limiter for a public API?","model":"claude-sonnet-4-5","promptTokensEstimate":1580}
+{"sessionId":"demo-entrevista","t":72486,"ev":"answer.first_token","messageId":"msg-si-9","latencyMs":640}
+{"sessionId":"demo-entrevista","t":74146,"ev":"answer.done","messageId":"msg-si-9","latencyMs":2300,"tokensIn":1580,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** And how would you design a rate limiter for a public API?\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":79925,"ev":"transcript.final","id":"si-010","channel":"me","speaker":"ME","text":"Token bucket per client key stored in Redis, with a sliding window for burst control.","startMs":74245,"endMs":79595,"confidence":0.96,"sttLatencyMs":330}
+{"sessionId":"demo-entrevista","t":80305,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":80825,"ev":"user.feedback","messageId":"msg-si-9","value":"up","note":null}
+{"sessionId":"demo-entrevista","t":89842,"ev":"transcript.final","id":"si-011","channel":"them","speaker":"THEM","text":"Let's do a quick coding one. Given an array of integers, return the indices of two numbers that add up to a target.","startMs":81405,"endMs":89475,"confidence":0.97,"sttLatencyMs":367}
+{"sessionId":"demo-entrevista","t":89843,"ev":"question.heuristic","text":"Let's do a quick coding one. Given an array of integers, return the indices of two numbers that add up to a target.","isQuestion":true,"needsAnswer":true,"qtype":"coding","score":0.5,"reasons":["coding_task"]}
+{"sessionId":"demo-entrevista","t":90262,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":91052,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"coding","question":"Given an array of integers, return the indices of two numbers that add up to a target.","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":91060,"ev":"answer.start","messageId":"msg-si-11","kind":"AUTO_ANSWER","question":"Given an array of integers, return the indices of two numbers that add up to a target.","model":"claude-sonnet-4-5","promptTokensEstimate":1620}
+{"sessionId":"demo-entrevista","t":91700,"ev":"answer.first_token","messageId":"msg-si-11","latencyMs":640}
+{"sessionId":"demo-entrevista","t":93360,"ev":"answer.done","messageId":"msg-si-11","latencyMs":2300,"tokensIn":1620,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** Given an array of integers, return the indices of two numbers that add up to a target.\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":99975,"ev":"transcript.final","id":"si-012","channel":"me","speaker":"ME","text":"Single pass with a hash map of complements; return as soon as the complement is found.","startMs":93881,"endMs":99571,"confidence":0.86,"sttLatencyMs":404}
+{"sessionId":"demo-entrevista","t":100355,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":104714,"ev":"transcript.final","id":"si-013","channel":"them","speaker":"THEM","text":"What's the time complexity of your solution?","startMs":101803,"endMs":104433,"confidence":0.87,"sttLatencyMs":281}
+{"sessionId":"demo-entrevista","t":104715,"ev":"question.heuristic","text":"What's the time complexity of your solution?","isQuestion":true,"needsAnswer":true,"qtype":"coding","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-entrevista","t":105134,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":105924,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"coding","question":"What's the time complexity of your solution?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":105932,"ev":"answer.start","messageId":"msg-si-13","kind":"AUTO_ANSWER","question":"What's the time complexity of your solution?","model":"claude-sonnet-4-5","promptTokensEstimate":1660}
+{"sessionId":"demo-entrevista","t":106572,"ev":"answer.first_token","messageId":"msg-si-13","latencyMs":640}
+{"sessionId":"demo-entrevista","t":108232,"ev":"answer.done","messageId":"msg-si-13","latencyMs":2300,"tokensIn":1660,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** What's the time complexity of your solution?\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":111443,"ev":"transcript.final","id":"si-014","channel":"me","speaker":"ME","text":"Linear time and linear space.","startMs":109175,"endMs":111125,"confidence":0.88,"sttLatencyMs":318}
+{"sessionId":"demo-entrevista","t":111823,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":112343,"ev":"user.feedback","messageId":"msg-si-13","value":"down","note":"too generic"}
+{"sessionId":"demo-entrevista","t":118424,"ev":"transcript.final","id":"si-015","channel":"them","speaker":"THEM","text":"The role involves a fair amount of on-call work and some travel to the Berlin office.","startMs":112379,"endMs":118069,"confidence":0.89,"sttLatencyMs":355}
+{"sessionId":"demo-entrevista","t":118425,"ev":"question.heuristic","text":"The role involves a fair amount of on-call work and some travel to the Berlin office.","isQuestion":false,"needsAnswer":false,"qtype":"other","score":0,"reasons":[]}
+{"sessionId":"demo-entrevista","t":118844,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":120744,"ev":"user.action","action":"answer","detail":null}
+{"sessionId":"demo-entrevista","t":120750,"ev":"answer.start","messageId":"msg-si-15-manual","kind":"MANUAL_ANSWER","question":null,"model":"claude-sonnet-4-5","promptTokensEstimate":1500}
+{"sessionId":"demo-entrevista","t":121450,"ev":"answer.first_token","messageId":"msg-si-15-manual","latencyMs":700}
+{"sessionId":"demo-entrevista","t":122850,"ev":"answer.done","messageId":"msg-si-15-manual","latencyMs":2100,"tokensIn":1500,"tokensOut":80,"cacheReadTokens":1100,"aborted":false,"content":"⭐ **Answer:** (manual, simulated) Suggested comment on the last thing said."}
+{"sessionId":"demo-entrevista","t":129937,"ev":"transcript.final","id":"si-016","channel":"me","speaker":"ME","text":"That works for me; I have done on-call rotations before and I am happy to travel occasionally.","startMs":123515,"endMs":129545,"confidence":0.9,"sttLatencyMs":392}
+{"sessionId":"demo-entrevista","t":130317,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":134280,"ev":"transcript.final","id":"si-017","channel":"them","speaker":"THEM","text":"Why are you leaving your current job?","startMs":131221,"endMs":133851,"confidence":0.91,"sttLatencyMs":429}
+{"sessionId":"demo-entrevista","t":134281,"ev":"question.heuristic","text":"Why are you leaving your current job?","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","score":1.1,"reasons":["question_mark","interrogative_start"]}
+{"sessionId":"demo-entrevista","t":134700,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":135490,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","question":"Why are you leaving your current job?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":135498,"ev":"answer.start","messageId":"msg-si-17","kind":"AUTO_ANSWER","question":"Why are you leaving your current job?","model":"claude-sonnet-4-5","promptTokensEstimate":1740}
+{"sessionId":"demo-entrevista","t":136138,"ev":"answer.first_token","messageId":"msg-si-17","latencyMs":640}
+{"sessionId":"demo-entrevista","t":137798,"ev":"answer.done","messageId":"msg-si-17","latencyMs":2300,"tokensIn":1740,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** Why are you leaving your current job?\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":144861,"ev":"transcript.final","id":"si-018","channel":"me","speaker":"ME","text":"The product is mature and I want to work on something earlier stage where I can own more.","startMs":138185,"endMs":144555,"confidence":0.92,"sttLatencyMs":306}
+{"sessionId":"demo-entrevista","t":145241,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":149626,"ev":"transcript.final","id":"si-019","channel":"them","speaker":"THEM","text":"Do you have any questions for us?","startMs":146653,"endMs":149283,"confidence":0.93,"sttLatencyMs":343}
+{"sessionId":"demo-entrevista","t":149627,"ev":"question.heuristic","text":"Do you have any questions for us?","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","score":1,"reasons":["question_mark","modal_start"]}
+{"sessionId":"demo-entrevista","t":150046,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":150836,"ev":"question.classified","isQuestion":true,"needsAnswer":true,"qtype":"behavioral","question":"Do you have any questions for us?","latencyMs":190,"model":"fake-classifier"}
+{"sessionId":"demo-entrevista","t":150844,"ev":"answer.start","messageId":"msg-si-19","kind":"AUTO_ANSWER","question":"Do you have any questions for us?","model":"claude-sonnet-4-5","promptTokensEstimate":1780}
+{"sessionId":"demo-entrevista","t":151484,"ev":"answer.first_token","messageId":"msg-si-19","latencyMs":640}
+{"sessionId":"demo-entrevista","t":153144,"ev":"answer.done","messageId":"msg-si-19","latencyMs":2300,"tokensIn":1780,"tokensOut":90,"cacheReadTokens":1100,"aborted":false,"content":"💬 **Question:** Do you have any questions for us?\n⭐ **Answer:** Suggested answer (simulated): key idea first, then one concrete example."}
+{"sessionId":"demo-entrevista","t":159003,"ev":"transcript.final","id":"si-020","channel":"me","speaker":"ME","text":"Yes, how does the team decide what goes into the roadmap each quarter?","startMs":153953,"endMs":158623,"confidence":0.94,"sttLatencyMs":380}
+{"sessionId":"demo-entrevista","t":159383,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":164830,"ev":"transcript.final","id":"si-021","channel":"them","speaker":"THEM","text":"Perfect, thanks so much for your time, we'll be in touch next week.","startMs":159743,"endMs":164413,"confidence":0.95,"sttLatencyMs":417}
+{"sessionId":"demo-entrevista","t":164831,"ev":"question.heuristic","text":"Perfect, thanks so much for your time, we'll be in touch next week.","isQuestion":false,"needsAnswer":false,"qtype":"other","score":0,"reasons":[]}
+{"sessionId":"demo-entrevista","t":165250,"ev":"utterance.end","channel":"them"}
+{"sessionId":"demo-entrevista","t":168328,"ev":"transcript.final","id":"si-022","channel":"me","speaker":"ME","text":"Thank you, have a great day.","startMs":165744,"endMs":168034,"confidence":0.96,"sttLatencyMs":294}
+{"sessionId":"demo-entrevista","t":168708,"ev":"utterance.end","channel":"me"}
+{"sessionId":"demo-entrevista","t":170076,"ev":"user.action","action":"end","detail":null}
+{"sessionId":"demo-entrevista","t":172176,"ev":"notes.generated","latencyMs":2100,"tokensIn":5200,"tokensOut":420}
+{"sessionId":"demo-entrevista","t":172276,"ev":"session.end","durationMs":172276,"reason":"user"}

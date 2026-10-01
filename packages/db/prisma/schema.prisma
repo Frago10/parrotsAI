@@ -1,0 +1,273 @@
+// Modelo de datos de CallPilot (Fase 1). Postgres. pgvector se añade en la fase de RAG.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Plan {
+  FREE
+  UNLIMITED_WEEKLY
+  UNLIMITED_MONTHLY
+  UNLIMITED_YEARLY
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum SessionMode {
+  INTERVIEW
+  REGULAR
+  MOCK
+}
+
+enum SessionState {
+  READY
+  LIVE
+  ENDED
+}
+
+enum SessionSource {
+  TAB_SHARE
+  DESKTOP_AUDIO
+  PHONE
+  BOT
+  MOCK
+}
+
+enum Speaker {
+  ME
+  THEM
+  UNKNOWN
+}
+
+enum AiMessageKind {
+  AUTO_ANSWER
+  MANUAL_ANSWER
+  SCREENSHOT
+  CHAT_USER
+  CHAT_AI
+}
+
+enum LedgerReason {
+  PURCHASE
+  SESSION_USAGE
+  REFUND
+  GRANT
+}
+
+enum FeedbackType {
+  FEEDBACK
+  BUG
+}
+
+model User {
+  id                   String        @id @default(cuid())
+  name                 String?
+  email                String        @unique
+  image                String?
+  plan                 Plan          @default(FREE)
+  creditsBalance       Decimal       @default(0) @db.Decimal(10, 2)
+  freeTrialUsedSeconds Int           @default(0)
+  theme                String        @default("system")
+  locale               String        @default("es")
+  createdAt            DateTime      @default(now())
+  resumes              Resume[]
+  documents            Document[]
+  sessions             CallSession[]
+  ledger               CreditLedger[]
+  feedback             Feedback[]
+  subscriptions        Subscription[]
+}
+
+model Resume {
+  id         String        @id @default(cuid())
+  userId     String
+  title      String
+  fileUrl    String?
+  parsedText String        @default("")
+  profile    Json?
+  isDefault  Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions   CallSession[]
+
+  @@index([userId, createdAt])
+}
+
+model Document {
+  id        String            @id @default(cuid())
+  userId    String
+  title     String
+  fileUrl   String?
+  mimeType  String
+  sizeBytes Int               @default(0)
+  status    DocumentStatus    @default(UPLOADED)
+  text      String            @default("")
+  createdAt DateTime          @default(now())
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chunks    DocumentChunk[]
+  sessions  SessionDocument[]
+
+  @@index([userId, createdAt])
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  index      Int
+  content    String
+  tokenCount Int      @default(0)
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, index])
+}
+
+model CallSession {
+  id              String              @id @default(cuid())
+  userId          String
+  company         String              @default("")
+  title           String              @default("")
+  description     String              @default("")
+  mode            SessionMode         @default(REGULAR)
+  language        String              @default("es")
+  model           String              @default("claude-haiku-4-5")
+  instructions    String              @default("")
+  resumeId        String?
+  autoAnswer      Boolean             @default(true)
+  saveTranscript  Boolean             @default(true)
+  saveForEval     Boolean             @default(false)
+  state           SessionState        @default(READY)
+  source          SessionSource       @default(TAB_SHARE)
+  startedAt       DateTime?
+  endedAt         DateTime?
+  durationSeconds Int                 @default(0)
+  creditsUsed     Decimal             @default(0) @db.Decimal(10, 2)
+  usedFreeTrial   Boolean             @default(false)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume          Resume?             @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  documents       SessionDocument[]
+  segments        TranscriptSegment[]
+  messages        AiMessage[]
+  notes           CallNotes?
+  ledger          CreditLedger[]
+  feedback        Feedback[]
+
+  @@index([userId, createdAt])
+  @@index([userId, state])
+}
+
+model SessionDocument {
+  sessionId  String
+  documentId String
+  session    CallSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  document   Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, documentId])
+}
+
+model TranscriptSegment {
+  id         String      @id @default(cuid())
+  sessionId  String
+  speaker    Speaker
+  text       String
+  startMs    Int
+  endMs      Int
+  isFinal    Boolean     @default(true)
+  language   String?
+  confidence Float?
+  createdAt  DateTime    @default(now())
+  session    CallSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, startMs])
+}
+
+model AiMessage {
+  id               String        @id @default(cuid())
+  sessionId        String
+  kind             AiMessageKind
+  detectedQuestion String?
+  questionType     String?
+  content          String
+  model            String
+  latencyMs        Int           @default(0)
+  firstTokenMs     Int?
+  tokensIn         Int           @default(0)
+  tokensOut        Int           @default(0)
+  imageUrl         String?
+  feedback         String?
+  sessionMs        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  session          CallSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model CallNotes {
+  id          String      @id @default(cuid())
+  sessionId   String      @unique
+  callDetails String      @default("")
+  summary     String      @default("")
+  questions   Json        @default("[]")
+  nextSteps   Json        @default("[]")
+  actionItems Json        @default("[]")
+  decisions   Json        @default("[]")
+  risks       Json        @default("[]")
+  model       String      @default("")
+  generatedAt DateTime    @default(now())
+  session     CallSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model CreditLedger {
+  id        String       @id @default(cuid())
+  userId    String
+  delta     Decimal      @db.Decimal(10, 2)
+  reason    LedgerReason
+  sessionId String?
+  stripeRef String?
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   CallSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id                   String   @id @default(cuid())
+  userId               String
+  stripeSubscriptionId String   @unique
+  plan                 Plan
+  status               String
+  currentPeriodEnd     DateTime
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BlocklistDomain {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  reason    String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        String       @id @default(cuid())
+  userId    String
+  sessionId String?
+  type      FeedbackType
+  message   String
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   CallSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}

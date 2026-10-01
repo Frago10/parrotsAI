@@ -1,0 +1,26 @@
+{
+  "name": "@callpilot/backtesting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "all": "tsx src/cli.ts all",
+    "level1": "tsx src/cli.ts level1",
+    "level2": "tsx src/cli.ts level2",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@callpilot/ai": "workspace:*",
+    "@callpilot/shared": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "eslint": "^10.11.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

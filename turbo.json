@@ -1,0 +1,28 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalEnv": [
+    "DATABASE_URL",
+    "ANTHROPIC_API_KEY",
+    "DEEPGRAM_API_KEY",
+    "ASSEMBLYAI_API_KEY",
+    "OPENAI_API_KEY",
+    "GOOGLE_API_KEY",
+    "STT_PROVIDER",
+    "LLM_PROVIDER",
+    "REALTIME_PORT",
+    "NEXT_PUBLIC_REALTIME_WS_URL",
+    "SESSION_LOG_DIR"
+  ],
+  "tasks": {
+    "dev": { "cache": false, "persistent": true },
+    "build": {
+      "dependsOn": ["^build", "generate"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "generate": { "cache": false },
+    "lint": { "dependsOn": ["generate"] },
+    "typecheck": { "dependsOn": ["generate"] },
+    "test": { "dependsOn": ["generate"] }
+  }
+}
