@@ -1,0 +1,17 @@
+node_modules/
+.turbo/
+.next/
+dist/
+out/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+packages/db/generated/
+backtesting/reports/*.md
+!backtesting/reports/.gitkeep
+data/sessions/
+test-results/
+playwright-report/
+.DS_Store

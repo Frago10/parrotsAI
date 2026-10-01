@@ -1,0 +1,18 @@
+{
+  "name": "@callpilot/ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "@callpilot/shared": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": { "vitest": "^5.0.3", "typescript": "~5.9.3", "eslint": "^10.11.0", "@types/node": "^26.6.3" }
+}

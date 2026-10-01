@@ -1,0 +1,29 @@
+{
+  "name": "callpilot",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CallPilot: copiloto de IA en tiempo real para llamadas (transcripción, detección de preguntas, respuestas sugeridas y notas).",
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @callpilot/db generate",
+    "db:migrate": "pnpm --filter @callpilot/db migrate",
+    "db:seed": "pnpm --filter @callpilot/db seed",
+    "backtest": "pnpm --filter @callpilot/backtesting run all"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.6",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}
