@@ -50,6 +50,7 @@ body {
     sans-serif;
 }
 
+@layer components {
 .btn {
   @apply inline-flex items-center justify-center gap-2 rounded-md border border-border bg-panel px-3 py-1.5 text-sm font-medium transition hover:bg-bg disabled:cursor-not-allowed disabled:opacity-50;
 }
@@ -70,6 +71,7 @@ body {
 }
 .badge {
   @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+}
 }
 
 @keyframes pulse-dot {

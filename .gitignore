@@ -12,6 +12,7 @@ packages/db/generated/
 backtesting/reports/*.md
 !backtesting/reports/.gitkeep
 data/sessions/
+apps/realtime/data/
 test-results/
 playwright-report/
 .DS_Store

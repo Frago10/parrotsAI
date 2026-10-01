@@ -297,7 +297,7 @@ export function LiveScreen({
         <span className="font-mono">{formatClock(clock)}</span>
         {state.remainingSeconds != null && (
           <span className="text-xs text-muted">
-            ⏳ {formatClock(state.remainingSeconds * 1000)}
+            ⏳ {formatRemaining(state.remainingSeconds)}
           </span>
         )}
         <VuMeter label={t('them')} level={levels.them} />
@@ -519,6 +519,12 @@ export function LiveScreen({
       )}
     </div>
   );
+}
+
+function formatRemaining(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return h > 0 ? `${h}h ${String(m).padStart(2, '0')}m` : formatClock(seconds * 1000);
 }
 
 function Bubble({

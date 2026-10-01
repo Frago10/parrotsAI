@@ -1,6 +1,7 @@
 // Configuración del servidor realtime a partir de variables de entorno (.env en la raíz).
 import { config as loadEnv } from 'dotenv';
 import path from 'node:path';
+import { sessionLogDir } from '@callpilot/shared/node';
 
 loadEnv({ path: path.resolve(process.cwd(), '../../.env'), quiet: true });
 loadEnv({ path: path.resolve(process.cwd(), '.env'), quiet: true });
@@ -35,7 +36,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RealtimeConfig
     host: env.REALTIME_HOST ?? '0.0.0.0',
     sttProvider,
     deepgramApiKey: env.DEEPGRAM_API_KEY,
-    sessionLogDir: path.resolve(process.cwd(), env.SESSION_LOG_DIR ?? '../../data/sessions'),
+    sessionLogDir: sessionLogDir(env),
     answerDebounceMs: Number(env.ANSWER_DEBOUNCE_MS ?? 600),
     utteranceEndFallbackMs: Number(env.UTTERANCE_END_FALLBACK_MS ?? 1500),
     transcriptWindowMs: Number(env.TRANSCRIPT_WINDOW_MS ?? 3 * 60_000),
