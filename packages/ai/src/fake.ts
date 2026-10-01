@@ -36,7 +36,7 @@ function lastUserContent(req: LlmRequest): string {
 }
 
 function detectLanguage(system: string): string {
-  return /Always answer in Spanish|answer in Spanish|Pregunta/.test(system) ? 'es' : 'en';
+  return /answer in Spanish|Pregunta/i.test(system) ? 'es' : 'en';
 }
 
 function fakeAnswer(req: LlmRequest): string {
