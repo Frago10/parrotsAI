@@ -16,3 +16,4 @@ apps/realtime/data/
 test-results/
 playwright-report/
 .DS_Store
+apps/web/next-env.d.ts
