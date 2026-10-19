@@ -15,6 +15,7 @@
   "dependencies": {
     "@callpilot/ai": "workspace:*",
     "@callpilot/db": "workspace:*",
+    "@callpilot/live-core": "workspace:*",
     "@callpilot/shared": "workspace:*",
     "next": "^16.3.8",
     "next-intl": "^4.14.8",

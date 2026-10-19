@@ -74,3 +74,30 @@ describe('resolveProviderForModel', () => {
     expect(r.notice).toContain('retirado');
   });
 });
+
+describe('FakeLlmProvider: lector de pantalla', () => {
+  const fake = new FakeLlmProvider({ chunkDelayMs: 0 });
+  it('recibe texto + imagen y detecta preguntas visibles', async () => {
+    const r = await fake.complete({
+      model: 'fake-fast',
+      system: 'Always answer in Spanish.',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'image', mediaType: 'image/jpeg', data: 'AAAA' },
+            {
+              type: 'text',
+              text: '## Page\nURL: https://ejemplo.com/quiz\nTitle: Quiz de SQL\n\n## Visible text (extracted from the DOM, in reading order)\nQuiz de SQL\n¿Cuál es la diferencia entre INNER JOIN y LEFT JOIN?\nSelecciona una opción\n\nA screenshot of the visible area is attached.\n\nNo explicit request: detect what the USER needs on this screen and help.',
+            },
+          ],
+        },
+      ],
+      maxTokens: 500,
+      purpose: 'screen',
+    });
+    expect(r.text).toContain('Quiz de SQL');
+    expect(r.text).toContain('captura: sí');
+    expect(r.text).toContain('INNER JOIN y LEFT JOIN');
+  });
+});

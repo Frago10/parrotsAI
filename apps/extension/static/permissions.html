@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>CallPilot: permiso de micrófono</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body class="page-permissions">
+    <main class="perm">
+      <h1>🎙 Permiso de micrófono</h1>
+      <p>
+        El panel lateral no puede mostrar el aviso de permiso de Chrome, así que se pide aquí una
+        sola vez. CallPilot usa tu micrófono únicamente mientras tengas la escucha activa en el
+        panel.
+      </p>
+      <button id="grant" class="primary">Conceder micrófono</button>
+      <p id="status" role="status"></p>
+    </main>
+    <script type="module" src="permissions.js"></script>
+  </body>
+</html>

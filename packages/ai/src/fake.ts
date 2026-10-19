@@ -7,7 +7,7 @@ import type {
   LlmRequest,
   LlmStreamEvent,
 } from './types';
-import { collectStream, estimateTokens } from './types';
+import { collectStream, estimateTokens, messageImageCount, messageText } from './types';
 
 export interface FakeProviderOptions {
   /** Retraso entre fragmentos para simular streaming (0 en tests). */
@@ -36,7 +36,7 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
 function lastUserContent(req: LlmRequest): string {
   for (let i = req.messages.length - 1; i >= 0; i--) {
     const m = req.messages[i]!;
-    if (m.role === 'user') return m.content;
+    if (m.role === 'user') return messageText(m);
   }
   return '';
 }
@@ -101,6 +101,56 @@ function fakeNotes(req: LlmRequest): string {
   });
 }
 
+/** Respuesta simulada del lector de pantalla: demuestra qué recibió el modelo (texto, imagen, preguntas). */
+function fakeScreen(req: LlmRequest): string {
+  const user = lastUserContent(req);
+  const images = req.messages.reduce((n, m) => n + messageImageCount(m), 0);
+  const lang = detectLanguage(req.system);
+  const title = user.match(/^Title: (.+)$/m)?.[1]?.trim() ?? '';
+  const url = user.match(/^URL: (.+)$/m)?.[1]?.trim() ?? '';
+  const host = (() => {
+    try {
+      return new URL(url).host;
+    } catch {
+      return url;
+    }
+  })();
+  const visible =
+    user.match(/## Visible text[^\n]*\n([\s\S]*?)(?=\n## |\n[A-Z][a-z ]+ is attached|$)/)?.[1] ??
+    '';
+  const request = user.match(/## Request from the USER\n([^\n]+)/)?.[1]?.trim() ?? '';
+  const fields = (
+    user.match(
+      /## Form fields on screen\n([\s\S]*?)(?=\n## |\nA screenshot|\nNo screenshot|$)/,
+    )?.[1] ?? ''
+  )
+    .split('\n')
+    .filter((l) => l.startsWith('- ')).length;
+  const questions = visible
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && detectQuestionHeuristic(l).needsAnswer)
+    .slice(0, 5);
+  const es = lang === 'es';
+  const lines: string[] = [];
+  lines.push(
+    es
+      ? `👁 **Veo:** ${title || 'una página'} (${host}) · ${visible.trim().length} caracteres de texto visible · captura: ${images ? 'sí' : 'no'}`
+      : `👁 **I see:** ${title || 'a page'} (${host}) · ${visible.trim().length} chars of visible text · screenshot: ${images ? 'yes' : 'no'}`,
+  );
+  lines.push(
+    es
+      ? `⭐ **Respuesta:** ${request ? `Sobre «${request}»: respuesta simulada.` : questions.length ? `Detecté ${questions.length} pregunta(s) en pantalla.` : 'No detecté preguntas en pantalla.'}`
+      : `⭐ **Answer:** ${request ? `About "${request}": simulated answer.` : questions.length ? `Found ${questions.length} question(s) on screen.` : 'No questions found on screen.'}`,
+  );
+  questions.forEach((q, i) => lines.push(`${i + 1}. ${q}`));
+  if (fields)
+    lines.push(
+      es ? `• Campos de formulario visibles: ${fields}` : `• Visible form fields: ${fields}`,
+    );
+  return lines.join('\n');
+}
+
 function fakeChat(req: LlmRequest): string {
   const user = lastUserContent(req);
   const lang = detectLanguage(req.system);
@@ -121,6 +171,8 @@ export class FakeLlmProvider implements LlmProvider {
         return fakeNotes(req);
       case 'notes_chunk':
         return '• Bloque resumido (simulado).';
+      case 'screen':
+        return fakeScreen(req);
       case 'chat':
       case 'ask':
         return fakeChat(req);
@@ -143,7 +195,8 @@ export class FakeLlmProvider implements LlmProvider {
       await sleep(this.opts.chunkDelayMs ?? 0, opts.signal);
     }
     const inputTokens =
-      estimateTokens(req.system) + req.messages.reduce((n, m) => n + estimateTokens(m.content), 0);
+      estimateTokens(req.system) +
+      req.messages.reduce((n, m) => n + estimateTokens(messageText(m)), 0);
     yield {
       type: 'done',
       usage: {

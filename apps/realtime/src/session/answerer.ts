@@ -4,9 +4,19 @@ import {
   buildAnswerSystemPrompt,
   buildAnswerUserPrompt,
   buildChatSystemPrompt,
+  buildScreenSystemPrompt,
+  buildScreenUserPrompt,
 } from '@callpilot/shared';
-import type { AiMessageKind, QuestionType, SessionContext } from '@callpilot/shared';
-import { isAbortError, type LlmProvider, type LlmUsage } from '@callpilot/ai';
+import type { AiMessageKind, PageContext, QuestionType, SessionContext } from '@callpilot/shared';
+import { isAbortError, type LlmContentPart, type LlmProvider, type LlmUsage } from '@callpilot/ai';
+
+/** Datos del lector de pantalla para un trabajo de tipo SCREENSHOT. */
+export interface ScreenInput {
+  page: PageContext | null;
+  prompt: string | null;
+  imageBase64: string | null;
+  imageMediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+}
 
 export interface AnswerJob {
   messageId: string;
@@ -16,6 +26,8 @@ export interface AnswerJob {
   recentTranscript: string;
   previousAnswers: string[];
   userInstruction?: string | null;
+  /** Presente cuando kind = SCREENSHOT. */
+  screen?: ScreenInput;
 }
 
 export interface AnswerCallbacks {
@@ -55,16 +67,47 @@ export class Answerer {
     this.current?.controller.abort();
   }
 
-  private systemPrompt(chat: boolean): string {
+  private systemPrompt(mode: 'answer' | 'chat' | 'screen'): string {
     const ctx = this.getContext();
-    const key = `${chat ? 'chat' : 'answer'}:${JSON.stringify(ctx)}`;
+    const key = `${mode}:${JSON.stringify(ctx)}`;
     if (this.systemPromptCache?.key !== key) {
-      this.systemPromptCache = {
-        key,
-        value: chat ? buildChatSystemPrompt(ctx) : buildAnswerSystemPrompt(ctx),
-      };
+      const value =
+        mode === 'chat'
+          ? buildChatSystemPrompt(ctx)
+          : mode === 'screen'
+            ? buildScreenSystemPrompt(ctx)
+            : buildAnswerSystemPrompt(ctx);
+      this.systemPromptCache = { key, value };
     }
     return this.systemPromptCache.value;
+  }
+
+  /** Mensaje de usuario del trabajo: texto o texto + imagen (lector de pantalla). */
+  private userContent(job: AnswerJob): string | LlmContentPart[] {
+    if (job.screen) {
+      const text = buildScreenUserPrompt({
+        page: job.screen.page,
+        prompt: job.screen.prompt,
+        hasImage: Boolean(job.screen.imageBase64),
+        recentTranscript: job.recentTranscript,
+        previousAnswers: job.previousAnswers,
+      });
+      if (!job.screen.imageBase64) return text;
+      return [
+        { type: 'image', mediaType: job.screen.imageMediaType, data: job.screen.imageBase64 },
+        { type: 'text', text },
+      ];
+    }
+    if (job.kind === 'CHAT_AI') {
+      return `## Recent transcript\n${job.recentTranscript || '(none)'}\n\n## USER message\n${job.userInstruction ?? ''}`;
+    }
+    return buildAnswerUserPrompt({
+      question: job.question,
+      qtype: job.qtype,
+      recentTranscript: job.recentTranscript,
+      previousAnswers: job.previousAnswers,
+      userInstruction: job.userInstruction ?? null,
+    });
   }
 
   async run(job: AnswerJob): Promise<void> {
@@ -82,30 +125,18 @@ export class Answerer {
     };
     let model = this.model;
     const isChat = job.kind === 'CHAT_AI';
+    const isScreen = job.screen != null;
     this.cb.onStart(job);
     try {
       const stream = this.llm.stream(
         {
           model: this.model,
-          system: this.systemPrompt(isChat),
-          messages: [
-            {
-              role: 'user',
-              content: isChat
-                ? `## Recent transcript\n${job.recentTranscript || '(none)'}\n\n## USER message\n${job.userInstruction ?? ''}`
-                : buildAnswerUserPrompt({
-                    question: job.question,
-                    qtype: job.qtype,
-                    recentTranscript: job.recentTranscript,
-                    previousAnswers: job.previousAnswers,
-                    userInstruction: job.userInstruction ?? null,
-                  }),
-            },
-          ],
-          maxTokens: job.qtype === 'coding' ? 1200 : 600,
+          system: this.systemPrompt(isScreen ? 'screen' : isChat ? 'chat' : 'answer'),
+          messages: [{ role: 'user', content: this.userContent(job) }],
+          maxTokens: isScreen ? 1500 : job.qtype === 'coding' ? 1200 : 600,
           temperature: 0.4,
-          purpose: isChat ? 'chat' : 'answer',
-          effort: 'low',
+          purpose: isScreen ? 'screen' : isChat ? 'chat' : 'answer',
+          effort: isScreen ? 'medium' : 'low',
         },
         { signal: controller.signal },
       );

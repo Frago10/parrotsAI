@@ -18,7 +18,11 @@
     "db:generate": "pnpm --filter @callpilot/db generate",
     "db:migrate": "pnpm --filter @callpilot/db migrate",
     "db:seed": "pnpm --filter @callpilot/db seed",
-    "backtest": "pnpm --filter @callpilot/backtesting run all"
+    "backtest": "pnpm --filter @callpilot/backtesting run all",
+    "ext:build": "pnpm --filter @callpilot/extension build",
+    "ext:dev": "pnpm --filter @callpilot/extension dev",
+    "ext:pack": "pnpm --filter @callpilot/extension run pack",
+    "ext:e2e": "pnpm --filter @callpilot/extension build && pnpm --filter @callpilot/extension e2e"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

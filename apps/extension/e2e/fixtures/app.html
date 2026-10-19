@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Panel de ventas</title>
+    <style>
+      body {
+        font: 15px sans-serif;
+        margin: 20px;
+      }
+      table {
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        border: 1px solid #999;
+        padding: 4px 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Panel de ventas</h1>
+    <h2>Resumen del trimestre</h2>
+    <table>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Unidades</th>
+      </tr>
+      <tr>
+        <td>Plan Pro</td>
+        <td>49</td>
+        <td>120</td>
+      </tr>
+      <tr>
+        <td>Plan Team</td>
+        <td>149</td>
+        <td>35</td>
+      </tr>
+    </table>
+    <h2>Error en producción</h2>
+    <pre>
+def suma(a, b):
+    return a + c
+
+Traceback (most recent call last):
+  File "app.py", line 2, in suma
+NameError: name 'c' is not defined</pre>
+    <img
+      src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+      alt="Gráfico de ventas por mes"
+      width="200"
+      height="80"
+    />
+    <label for="plan">Plan</label>
+    <select id="plan">
+      <option>Free</option>
+      <option selected>Pro</option>
+      <option>Team</option>
+    </select>
+    <label for="notes">Notas</label>
+    <textarea id="notes">Cliente pide descuento</textarea>
+    <my-card></my-card>
+    <iframe
+      srcdoc="<p>Contenido dentro de un iframe: ¿Puedes confirmar el pedido #4821?</p>"
+      width="400"
+      height="60"
+    ></iframe>
+    <script>
+      class MyCard extends HTMLElement {
+        constructor() {
+          super();
+          const r = this.attachShadow({ mode: 'open' });
+          r.innerHTML = '<p>Texto dentro de shadow DOM</p>';
+        }
+      }
+      customElements.define('my-card', MyCard);
+    </script>
+  </body>
+</html>

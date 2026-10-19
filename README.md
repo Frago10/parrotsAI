@@ -16,6 +16,7 @@ flowchart LR
   end
   AW -- "WS binario (canal me/them)" --> RT
   UI -- "WS JSON (protocolo Zod)" --> RT
+  EXT["Extensión de Chrome: lector de pantalla + audio de pestaña"] -- "WS JSON + audio + capturas" --> RT
   subgraph Realtime["apps/realtime (Fastify + ws)"]
     RT[Sesión en vivo]
     STT[SttProvider: Deepgram | Fake]
@@ -36,15 +37,17 @@ flowchart LR
 
 ## Estructura
 
-| Carpeta           | Contenido                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| `apps/web`        | Next.js 16: workspace, lista de sesiones, pantalla en vivo, vista post-llamada        |
-| `apps/realtime`   | Servidor WebSocket: audio -> STT -> detección de preguntas -> respuesta -> notas      |
-| `packages/shared` | Protocolo WS (Zod), heurística de preguntas, prompts versionados, catálogo de modelos |
-| `packages/ai`     | Interfaz `LlmProvider` con implementación Anthropic y simulador determinista          |
-| `packages/db`     | Prisma 7 + Postgres: schema, migraciones, seed                                        |
-| `backtesting`     | Dataset etiquetado es/en, runner de métricas y replay de sesiones JSONL               |
-| `docs`            | Revisión del proyecto y plan de backtesting                                           |
+| Carpeta              | Contenido                                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| `apps/web`           | Next.js 16: workspace, lista de sesiones, pantalla en vivo, vista post-llamada                            |
+| `apps/realtime`      | Servidor WebSocket: audio -> STT -> detección de preguntas -> respuesta -> notas                          |
+| `apps/extension`     | Extensión de Chrome (MV3) con panel lateral: lector de pantalla inteligente, audio de pestaña y micrófono |
+| `packages/shared`    | Protocolo WS (Zod), heurística de preguntas, prompts versionados, catálogo de modelos                     |
+| `packages/ai`        | Interfaz `LlmProvider` con implementación Anthropic y simulador determinista                              |
+| `packages/live-core` | Cliente WebSocket, estado, captura de audio e imagen compartidos por la web y la extensión                |
+| `packages/db`        | Prisma 7 + Postgres: schema, migraciones, seed                                                            |
+| `backtesting`        | Dataset etiquetado es/en, runner de métricas y replay de sesiones JSONL                                   |
+| `docs`               | Revisión del proyecto y plan de backtesting                                                               |
 
 ## Puesta en marcha
 
@@ -60,6 +63,16 @@ pnpm dev                        # web en http://localhost:3000, realtime en ws:/
 
 Sin claves de API todo funciona con los proveedores simulados (`STT_PROVIDER=fake`, `LLM_PROVIDER=fake`): la transcripción se inyecta desde el panel de debug y las respuestas son deterministas. Con `DEEPGRAM_API_KEY` y `ANTHROPIC_API_KEY` en `.env` y `STT_PROVIDER=deepgram`, `LLM_PROVIDER=anthropic`, se usan los servicios reales.
 
+## Extensión de Chrome
+
+Lee lo que ves en cualquier página web (texto + captura) y responde sobre eso, además de escuchar la pestaña y el micrófono.
+
+```bash
+pnpm ext:build    # genera apps/extension/dist
+```
+
+En `chrome://extensions` activa el modo de desarrollador y carga `apps/extension/dist`. Guía completa, permisos, privacidad y checklist de pruebas en `docs/02-extension-chrome.md`.
+
 ## Comandos
 
 ```bash
@@ -68,6 +81,8 @@ pnpm typecheck    # tsc --noEmit en todos los paquetes
 pnpm test         # Vitest (unidades: heurística, prompts, créditos, proveedores)
 pnpm backtest     # niveles 1 y 2 del backtesting, reporte en backtesting/reports/
 pnpm --filter @callpilot/web e2e   # Playwright contra web:3000 y realtime:4001 ya levantados
+pnpm ext:e2e      # build + E2E de la extensión cargada en Chromium (levanta su propio servidor simulado)
+pnpm ext:pack     # zip de la extensión en apps/extension/
 ```
 
 ## Backtesting

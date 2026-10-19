@@ -2,11 +2,19 @@
 import cors from '@fastify/cors';
 import websocket from '@fastify/websocket';
 import Fastify from 'fastify';
+import { z } from 'zod';
 import pino from 'pino';
-import { prisma } from '@callpilot/db';
-import { buildAskAiSystemPrompt, encodeServerMessage, type ServerMessage } from '@callpilot/shared';
+import { ensureDefaultUser, prisma } from '@callpilot/db';
+import {
+  DEFAULT_MODEL_ID,
+  LANGUAGES,
+  MODEL_CATALOG,
+  buildAskAiSystemPrompt,
+  encodeServerMessage,
+  type ServerMessage,
+} from '@callpilot/shared';
 import { resolveProviderForModel } from '@callpilot/ai';
-import { loadConfig } from './config';
+import { isAllowedOrigin, loadConfig } from './config';
 import { LiveSession } from './session/liveSession';
 import { generateNotes } from './session/notes';
 import { FileSessionLog } from './session/sessionLog';
@@ -22,14 +30,111 @@ const stt = createSttProvider(config);
 
 export async function buildServer() {
   const app = Fastify({ loggerInstance: logger });
-  await app.register(cors, { origin: true });
-  await app.register(websocket, { options: { maxPayload: 1024 * 1024 } });
+  // Solo la web local, la extensión y los orígenes de ALLOWED_ORIGINS pueden usar el servidor.
+  await app.register(cors, {
+    origin: (origin, cb) => cb(null, isAllowedOrigin(origin, config.allowedOrigins)),
+  });
+  await app.register(websocket, {
+    options: {
+      // Las capturas de pantalla llegan en base64 por el mismo socket (hasta ~7 MB).
+      maxPayload: 10 * 1024 * 1024,
+      verifyClient: (info, next) =>
+        next(isAllowedOrigin(info.origin, config.allowedOrigins), 403, 'origin no permitido'),
+    },
+  });
 
   app.get('/health', async () => ({
     ok: true,
     stt: stt.id,
     llmProvider: process.env.LLM_PROVIDER ?? 'auto',
   }));
+
+  // Configuración que necesita la extensión: modelos disponibles y proveedores activos.
+  app.get('/api/config', async () => {
+    const forcedFake = process.env.LLM_PROVIDER === 'fake';
+    return {
+      stt: stt.id,
+      llmProvider: process.env.LLM_PROVIDER ?? 'auto',
+      defaultModel: DEFAULT_MODEL_ID,
+      models: MODEL_CATALOG.map((m) => ({
+        id: m.id,
+        label: m.label,
+        provider: m.provider,
+        speed: m.speed,
+        vision: m.vision,
+        available:
+          m.provider === 'fake' ||
+          (!forcedFake &&
+            Boolean(m.requiresEnv && process.env[m.requiresEnv]) &&
+            m.provider === 'anthropic'),
+      })),
+      languages: LANGUAGES.length,
+    };
+  });
+
+  app.get<{ Querystring: { state?: string; limit?: string } }>('/api/sessions', async (req) => {
+    const user = await ensureDefaultUser(prisma);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit ?? 20) || 20));
+    const state = req.query.state;
+    const sessions = await prisma.callSession.findMany({
+      where: {
+        userId: user.id,
+        ...(state === 'active'
+          ? { state: { in: ['READY', 'LIVE'] } }
+          : state === 'ended'
+            ? { state: 'ENDED' }
+            : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        company: true,
+        title: true,
+        mode: true,
+        state: true,
+        language: true,
+        model: true,
+        createdAt: true,
+      },
+    });
+    return { sessions };
+  });
+
+  const NewSession = z.object({
+    company: z.string().trim().max(200).default(''),
+    title: z.string().trim().max(200).default(''),
+    description: z.string().trim().max(2000).default(''),
+    mode: z.enum(['INTERVIEW', 'REGULAR']).default('REGULAR'),
+    language: z.string().min(2).max(10).default('es'),
+    model: z.string().min(1).default(DEFAULT_MODEL_ID),
+    instructions: z.string().max(50_000).default(''),
+    autoAnswer: z.boolean().default(true),
+    saveTranscript: z.boolean().default(true),
+    saveForEval: z.boolean().default(false),
+  });
+
+  // Sesión rápida desde la extensión (sin pasar por el formulario de la web).
+  app.post('/api/sessions', async (req, reply) => {
+    const parsed = NewSession.safeParse(req.body ?? {});
+    if (!parsed.success)
+      return reply.code(400).send({ error: 'invalid_body', issues: parsed.error.issues });
+    const user = await ensureDefaultUser(prisma);
+    const session = await prisma.callSession.create({
+      data: { userId: user.id, ...parsed.data, source: 'TAB_SHARE' },
+      select: {
+        id: true,
+        company: true,
+        title: true,
+        mode: true,
+        state: true,
+        language: true,
+        model: true,
+        createdAt: true,
+      },
+    });
+    return reply.code(201).send(session);
+  });
 
   app.get('/ws', { websocket: true }, (socket) => {
     const session = new LiveSession({

@@ -67,7 +67,12 @@ export const SessionLogEventSchema = z.discriminatedUnion('ev', [
     model: z.string(),
     promptTokensEstimate: z.number().nullable(),
   }),
-  z.object({ ...base, ev: z.literal('answer.first_token'), messageId: z.string(), latencyMs: z.number() }),
+  z.object({
+    ...base,
+    ev: z.literal('answer.first_token'),
+    messageId: z.string(),
+    latencyMs: z.number(),
+  }),
   z.object({
     ...base,
     ev: z.literal('answer.done'),
@@ -79,11 +84,26 @@ export const SessionLogEventSchema = z.discriminatedUnion('ev', [
     aborted: z.boolean(),
     content: z.string(),
   }),
-  z.object({ ...base, ev: z.literal('answer.error'), messageId: z.string().nullable(), message: z.string() }),
+  z.object({
+    ...base,
+    ev: z.literal('answer.error'),
+    messageId: z.string().nullable(),
+    message: z.string(),
+  }),
   z.object({
     ...base,
     ev: z.literal('user.action'),
-    action: z.enum(['answer', 'clear', 'chat', 'screenshot', 'pause', 'resume', 'end', 'language', 'autoAnswer']),
+    action: z.enum([
+      'answer',
+      'clear',
+      'chat',
+      'screenshot',
+      'pause',
+      'resume',
+      'end',
+      'language',
+      'autoAnswer',
+    ]),
     detail: z.string().nullable(),
   }),
   z.object({
@@ -93,7 +113,26 @@ export const SessionLogEventSchema = z.discriminatedUnion('ev', [
     value: z.enum(['up', 'down']),
     note: z.string().nullable(),
   }),
-  z.object({ ...base, ev: z.literal('notes.generated'), latencyMs: z.number(), tokensIn: z.number(), tokensOut: z.number() }),
+  z.object({
+    ...base,
+    ev: z.literal('screen.context'),
+    messageId: z.string(),
+    trigger: z.string(),
+    url: z.string(),
+    title: z.string(),
+    viewportChars: z.number(),
+    fullChars: z.number(),
+    hasImage: z.boolean(),
+    imageKb: z.number(),
+    prompt: z.string().nullable(),
+  }),
+  z.object({
+    ...base,
+    ev: z.literal('notes.generated'),
+    latencyMs: z.number(),
+    tokensIn: z.number(),
+    tokensOut: z.number(),
+  }),
 ]);
 export type SessionLogEvent = z.infer<typeof SessionLogEventSchema>;
 

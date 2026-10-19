@@ -17,3 +17,8 @@ test-results/
 playwright-report/
 .DS_Store
 apps/web/next-env.d.ts
+apps/extension/dist/
+apps/extension/*.zip
+apps/extension/test-results/
+*.tsbuildinfo
+*.tgz

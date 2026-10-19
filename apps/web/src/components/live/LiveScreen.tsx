@@ -8,7 +8,12 @@ import { formatClock, LANGUAGES } from '@callpilot/shared';
 import type { AudioChannel } from '@callpilot/shared';
 import { AnswerCard } from '@/components/live/AnswerCard';
 import { useLiveSession } from '@/hooks/useLiveSession';
-import { AudioCapture, isTabAudioSupported, NoAudioTrackError } from '@/lib/audio/capture';
+import {
+  AudioCapture,
+  downscaleImage,
+  isTabAudioSupported,
+  NoAudioTrackError,
+} from '@callpilot/live-core';
 
 interface SessionInfo {
   id: string;
@@ -174,7 +179,8 @@ export function LiveScreen({
     return () => window.removeEventListener('keydown', onKey);
   }, [send]);
 
-  async function screenshot() {
+  // Screenshot: toma un frame de la pestaña compartida y lo manda al lector de pantalla (visión).
+  async function screenshot(prompt?: string) {
     const blob = await captureRef.current?.grabFrame();
     if (!blob) {
       setCaptureError(
@@ -182,13 +188,14 @@ export function LiveScreen({
       );
       return;
     }
-    // Fase 6: el análisis con visión se conecta aquí; por ahora se descarga la captura.
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `screenshot-${Date.now()}.webp`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const img = await downscaleImage(blob, { maxSide: 1568, quality: 0.8 });
+    send({
+      type: 'screen.analyze',
+      prompt: prompt?.trim() || undefined,
+      imageBase64: img.base64,
+      imageMediaType: img.mediaType,
+      trigger: 'web',
+    });
   }
 
   const statusLabel =
@@ -296,9 +303,7 @@ export function LiveScreen({
         </span>
         <span className="font-mono">{formatClock(clock)}</span>
         {state.remainingSeconds != null && (
-          <span className="text-xs text-muted">
-            ⏳ {formatRemaining(state.remainingSeconds)}
-          </span>
+          <span className="text-xs text-muted">⏳ {formatRemaining(state.remainingSeconds)}</span>
         )}
         <VuMeter label={t('them')} level={levels.them} />
         <VuMeter label={t('you')} level={levels.me} />
@@ -466,7 +471,7 @@ export function LiveScreen({
             >
               ⚡ {t('answer')}
             </button>
-            <button className="btn flex-1 md:flex-none" onClick={() => void screenshot()}>
+            <button className="btn flex-1 md:flex-none" onClick={() => void screenshot(chat)}>
               📷 {t('screenshot')}
             </button>
             <input

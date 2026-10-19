@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CallPilot</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="top">
+      <span id="dot" class="dot off" title="Sin conexión"></span>
+      <strong>CallPilot</strong>
+      <select id="sessionSelect" title="Sesión"></select>
+      <button id="btnSettings" class="icon" title="Ajustes" aria-label="Ajustes">⚙</button>
+    </header>
+
+    <div id="notices" class="notices" role="status"></div>
+
+    <section class="actions">
+      <button id="btnRead" class="primary" title="Alt+Shift+R">👁 Leer pantalla</button>
+      <button id="btnAnswer" title="Ctrl+Enter">⚡ Answer</button>
+      <button id="btnTab" title="Alt+Shift+A">🎧 Pestaña</button>
+      <button id="btnMic">🎙 Mic</button>
+    </section>
+
+    <section class="opts">
+      <label><input type="checkbox" id="optImage" /> Captura</label>
+      <label><input type="checkbox" id="optFull" /> Página completa</label>
+      <label><input type="checkbox" id="optAuto" /> Auto-lectura</label>
+      <label><input type="checkbox" id="optAnswer" /> Auto Answer</label>
+    </section>
+
+    <section class="ask">
+      <div class="chips">
+        <button class="chip" data-prompt="Responde las preguntas que se ven en pantalla.">
+          Responder preguntas
+        </button>
+        <button class="chip" data-prompt="Resume lo que hay en pantalla en 5 puntos.">
+          Resumir
+        </button>
+        <button
+          class="chip"
+          data-prompt="Explica el error o el código que se ve y cómo arreglarlo."
+        >
+          Error / código
+        </button>
+        <button class="chip" data-prompt="Redacta una respuesta para este mensaje o correo.">
+          Redactar respuesta
+        </button>
+        <button class="chip" data-prompt="Traduce al español lo que se ve en pantalla.">
+          Traducir
+        </button>
+      </div>
+      <div class="row">
+        <textarea
+          id="prompt"
+          rows="2"
+          placeholder="Pregunta sobre lo que ves… (Enter envía)"
+        ></textarea>
+        <button id="btnAsk" class="primary">Enviar</button>
+      </div>
+      <label class="small"
+        ><input type="checkbox" id="askScreen" checked /> usar la pantalla al preguntar</label
+      >
+    </section>
+
+    <div class="vu">
+      <span>Ellos</span><span class="bar"><i id="vuThem"></i></span> <span>Tú</span
+      ><span class="bar"><i id="vuMe"></i></span>
+      <span id="clock" class="clock"></span>
+    </div>
+
+    <main id="answers" class="answers"></main>
+
+    <details id="transcriptBox">
+      <summary>Transcripción</summary>
+      <div id="transcript" class="transcript"></div>
+    </details>
+
+    <details id="debugBox">
+      <summary>Debug</summary>
+      <div id="debug" class="debug"></div>
+      <div class="row">
+        <input
+          id="injectText"
+          placeholder="Frase de prueba, p. ej. ¿Cómo manejas los plazos ajustados?"
+        />
+        <button id="injectThem">Ellos</button>
+        <button id="injectMe">Tú</button>
+      </div>
+    </details>
+
+    <aside id="settings" class="settings" hidden>
+      <h2>Ajustes</h2>
+      <label>Servidor <input id="setServer" placeholder="http://localhost:4001" /></label>
+      <label
+        >Idioma de la sesión
+        <select id="setLanguage"></select
+      ></label>
+      <label
+        >Modelo
+        <select id="setModel"></select
+      ></label>
+      <label
+        >Instrucciones para la IA
+        <textarea
+          id="setInstructions"
+          rows="4"
+          placeholder="Quién eres, qué necesitas, tono, datos útiles…"
+        ></textarea>
+      </label>
+      <label
+        >Dominios bloqueados (no se lee ni captura)
+        <input id="setBlocked" placeholder="banco.com, correo.com"
+      /></label>
+      <label
+        >Intervalo de auto-lectura (segundos)
+        <input id="setInterval" type="number" min="5" max="120"
+      /></label>
+      <div class="row">
+        <button id="btnSave" class="primary">Guardar</button>
+        <button id="btnNewSession">Nueva sesión</button>
+        <button id="btnEndSession" class="danger">Terminar sesión</button>
+        <button id="btnCloseSettings">Cerrar</button>
+      </div>
+      <p class="small" id="serverInfo"></p>
+    </aside>
+
+    <div id="consent" class="modal" hidden>
+      <div class="modal-box">
+        <h2>Antes de escuchar</h2>
+        <p>
+          El audio de la pestaña y de tu micrófono se transcribe con IA. Asegúrate de tener el
+          consentimiento de los participantes y de que usar asistencia de IA está permitido en esta
+          conversación. El audio no se guarda; solo el texto.
+        </p>
+        <label
+          ><input type="checkbox" id="consentCheck" /> Tengo el consentimiento de los
+          participantes</label
+        >
+        <div class="row">
+          <button id="consentOk" class="primary" disabled>Continuar</button>
+          <button id="consentCancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

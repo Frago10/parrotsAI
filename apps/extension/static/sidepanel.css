@@ -1,0 +1,405 @@
+:root {
+  --bg: #f7f7f8;
+  --panel: #ffffff;
+  --border: #e4e4e7;
+  --text: #18181b;
+  --muted: #71717a;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0b0e;
+    --panel: #151519;
+    --border: #27272a;
+    --text: #f4f4f5;
+    --muted: #a1a1aa;
+    --accent: #60a5fa;
+    --accent-soft: #1e3a5f;
+    --ok: #22c55e;
+    --warn: #f59e0b;
+    --bad: #f87171;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    13px/1.45 ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 8px;
+  gap: 8px;
+}
+button,
+select,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+button.danger {
+  color: var(--bad);
+  border-color: var(--bad);
+}
+button.icon {
+  padding: 2px 8px;
+}
+button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  width: auto;
+}
+textarea {
+  resize: vertical;
+}
+label {
+  display: block;
+}
+.small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.row > button {
+  white-space: nowrap;
+}
+
+.top {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.top select {
+  flex: 1;
+  min-width: 0;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.dot.on {
+  background: var(--ok);
+}
+.dot.wait {
+  background: var(--warn);
+  animation: pulse 1.2s infinite;
+}
+.dot.off {
+  background: var(--bad);
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.notice {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.notice.err {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+.notice button {
+  border: 0;
+  background: transparent;
+  padding: 0 4px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 6px;
+}
+.opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+}
+.opts label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.chip {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.ask .row {
+  align-items: flex-end;
+}
+.ask textarea {
+  flex: 1;
+}
+
+.vu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.vu .bar {
+  width: 60px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.vu .bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--ok);
+  transition: width 0.1s;
+}
+.clock {
+  margin-left: auto;
+  font-family: ui-monospace, monospace;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 120px;
+}
+.empty {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+}
+.card {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.card.pinned {
+  border-color: var(--accent);
+}
+.card.kind-CHAT_USER {
+  border-style: dashed;
+}
+.card header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.card header .label {
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card header .tools button {
+  border: 0;
+  background: transparent;
+  padding: 0 3px;
+  font-size: 12px;
+}
+.card header .tools button.on {
+  color: var(--accent);
+}
+.card .body p {
+  margin: 4px 0;
+}
+.card .body ul,
+.card .body ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.card .body pre {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+}
+.card .body code {
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 0 3px;
+  font-size: 12px;
+}
+.card .body pre code {
+  background: transparent;
+  padding: 0;
+}
+.card.streaming .label::after {
+  content: ' ●';
+  color: var(--accent);
+  animation: pulse 1s infinite;
+}
+.card .err {
+  color: var(--bad);
+}
+
+details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 4px 8px;
+}
+summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.transcript {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 6px;
+}
+.transcript .seg {
+  margin: 2px 0;
+}
+.transcript .me {
+  color: var(--accent);
+}
+.transcript .partial {
+  color: var(--muted);
+}
+.debug {
+  color: var(--muted);
+  font-size: 11px;
+  margin: 6px 0;
+}
+
+.settings {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+.settings[hidden],
+.modal[hidden] {
+  display: none;
+}
+.settings h2,
+.modal h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.settings .row {
+  flex-wrap: wrap;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+.modal-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+}
+
+.page-permissions {
+  align-items: center;
+  justify-content: center;
+}
+.perm {
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

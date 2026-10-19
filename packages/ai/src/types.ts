@@ -2,12 +2,34 @@
 // nunca con un SDK concreto, para poder cambiar de proveedor y para backtesting.
 import type { LlmProviderId } from '@callpilot/shared';
 
+/** Fragmento de un mensaje: texto o imagen en base64 (para el lector de pantalla). */
+export type LlmContentPart =
+  | { type: 'text'; text: string }
+  | {
+      type: 'image';
+      mediaType: 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
+      data: string;
+    };
+
 export interface LlmMessage {
   role: 'user' | 'assistant';
-  content: string;
+  content: string | LlmContentPart[];
 }
 
-export type LlmPurpose = 'answer' | 'chat' | 'classify' | 'notes' | 'notes_chunk' | 'ask';
+/** Texto plano de un mensaje (ignora las imágenes). */
+export function messageText(m: LlmMessage): string {
+  return typeof m.content === 'string'
+    ? m.content
+    : m.content.map((p) => (p.type === 'text' ? p.text : '')).join('\n');
+}
+
+/** Cantidad de imágenes adjuntas a un mensaje. */
+export function messageImageCount(m: LlmMessage): number {
+  return typeof m.content === 'string' ? 0 : m.content.filter((p) => p.type === 'image').length;
+}
+
+export type LlmPurpose =
+  'answer' | 'chat' | 'classify' | 'notes' | 'notes_chunk' | 'ask' | 'screen';
 
 export interface LlmRequest {
   model: string;

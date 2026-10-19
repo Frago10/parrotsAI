@@ -35,6 +35,54 @@ export type AiMessageKind = z.infer<typeof AiMessageKindSchema>;
 export const LiveStateSchema = z.enum(['CONNECTING', 'LIVE', 'PAUSED', 'ENDED']);
 export type LiveState = z.infer<typeof LiveStateSchema>;
 
+// ---------- Lector de pantalla ----------
+/** Lo que el lector extrae de la página que el usuario está viendo. Todo con límites de tamaño. */
+export const PageContextSchema = z.object({
+  url: z.string().max(2000),
+  title: z.string().max(500).default(''),
+  lang: z.string().max(20).optional(),
+  /** Texto seleccionado por el usuario, si hay. */
+  selection: z.string().max(6000).optional(),
+  headings: z.array(z.string().max(300)).max(40).optional(),
+  /** Texto visible en el viewport, en orden de lectura. */
+  viewportText: z.string().max(12_000).default(''),
+  /** Texto de toda la página (solo si el usuario lo pide). */
+  fullText: z.string().max(40_000).optional(),
+  /** Campos de formulario visibles: etiqueta, tipo y valor actual. */
+  inputs: z
+    .array(
+      z.object({
+        label: z.string().max(300),
+        type: z.string().max(40),
+        value: z.string().max(500).optional(),
+        options: z.array(z.string().max(200)).max(30).optional(),
+      }),
+    )
+    .max(60)
+    .optional(),
+  tables: z.array(z.string().max(3000)).max(4).optional(),
+  code: z.array(z.string().max(3000)).max(6).optional(),
+  images: z.array(z.string().max(300)).max(20).optional(),
+  scrollPct: z.number().min(0).max(100).optional(),
+  viewport: z.object({ w: z.number(), h: z.number() }).optional(),
+});
+export type PageContext = z.infer<typeof PageContextSchema>;
+
+export const ScreenAnalyzeSchema = z.object({
+  type: z.literal('screen.analyze'),
+  /** Id generado por el cliente para correlacionar (opcional). */
+  requestId: z.string().max(80).optional(),
+  /** Pregunta o instrucción del usuario sobre lo que ve. Vacío = detectar la tarea en pantalla. */
+  prompt: z.string().max(4000).optional(),
+  /** Captura en base64 (sin prefijo data:). */
+  imageBase64: z.string().max(7_000_000).optional(),
+  imageMediaType: z.enum(['image/jpeg', 'image/png', 'image/webp']).default('image/jpeg'),
+  page: PageContextSchema.optional(),
+  /** Origen de la lectura: botón, atajo, auto-lectura, selección o la web app. */
+  trigger: z.enum(['manual', 'shortcut', 'auto', 'selection', 'web']).default('manual'),
+});
+export type ScreenAnalyze = z.infer<typeof ScreenAnalyzeSchema>;
+
 // ---------- Cliente -> Servidor ----------
 export const ClientMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('session.join'), sessionId: z.string().min(1) }),
@@ -54,6 +102,7 @@ export const ClientMessageSchema = z.discriminatedUnion('type', [
     note: z.string().max(500).optional(),
   }),
   z.object({ type: z.literal('heartbeat'), clientTs: z.number() }),
+  ScreenAnalyzeSchema,
   // Solo para backtesting y pruebas: inyecta texto como si viniera del STT.
   z.object({
     type: z.literal('debug.transcript'),
@@ -127,7 +176,11 @@ export const ServerMessageSchema = z.discriminatedUnion('type', [
     model: z.string(),
     aborted: z.boolean().default(false),
   }),
-  z.object({ type: z.literal('answer.error'), messageId: z.string().nullable(), message: z.string() }),
+  z.object({
+    type: z.literal('answer.error'),
+    messageId: z.string().nullable(),
+    message: z.string(),
+  }),
   z.object({
     type: z.literal('chat.user'),
     messageId: z.string(),
@@ -187,7 +240,9 @@ export function encodeAudioFrame(channel: AudioChannel, pcm16: Int16Array): Uint
 }
 
 /** Separa el canal y el PCM de un frame binario. */
-export function decodeAudioFrame(frame: Uint8Array): { channel: AudioChannel; pcm: Uint8Array } | null {
+export function decodeAudioFrame(
+  frame: Uint8Array,
+): { channel: AudioChannel; pcm: Uint8Array } | null {
   if (frame.byteLength < 3) return null;
   const byte = frame[0];
   const channel = byte === 0 ? 'me' : byte === 1 ? 'them' : null;

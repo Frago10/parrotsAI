@@ -1,5 +1,5 @@
-// Captura de audio en el navegador: pestaña compartida (canal "them") y micrófono (canal "me").
-// Todo se remuestrea a 16 kHz mono PCM16 vía AudioWorklet.
+// Captura de audio en el navegador: pestaña (canal "them") y micrófono (canal "me").
+// Todo se remuestrea a 16 kHz mono PCM16 vía AudioWorklet. Lo usan la web y la extensión.
 import { AUDIO_SAMPLE_RATE, type AudioChannel } from '@callpilot/shared';
 
 export class NoAudioTrackError extends Error {
@@ -13,6 +13,8 @@ export interface AudioCaptureHandlers {
   onChunk: (channel: AudioChannel, pcm: Int16Array) => void;
   onLevel: (channel: AudioChannel, level: number) => void;
   onTabEnded: () => void;
+  /** Ruta del worklet dentro de la app. Por defecto /worklets/pcm-processor.js. */
+  workletUrl?: string;
 }
 
 interface ChannelNodes {
@@ -30,6 +32,8 @@ export function isTabAudioSupported(): boolean {
 
 export class AudioCapture {
   private ctx: AudioContext | null = null;
+  private playbackCtx: AudioContext | null = null;
+  private playbackNodes: Partial<Record<AudioChannel, MediaStreamAudioSourceNode>> = {};
   private channels: Partial<Record<AudioChannel, ChannelNodes>> = {};
   private workletLoaded = false;
   /** Pista de video de la pestaña compartida, en memoria solo para la función Screenshot. */
@@ -41,13 +45,23 @@ export class AudioCapture {
     if (!this.ctx) this.ctx = new AudioContext({ sampleRate: AUDIO_SAMPLE_RATE });
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     if (!this.workletLoaded) {
-      await this.ctx.audioWorklet.addModule('/worklets/pcm-processor.js');
+      await this.ctx.audioWorklet.addModule(
+        this.handlers.workletUrl ?? '/worklets/pcm-processor.js',
+      );
       this.workletLoaded = true;
     }
     return this.ctx;
   }
 
-  private async attach(channel: AudioChannel, stream: MediaStream): Promise<void> {
+  /**
+   * Conecta un stream de audio a un canal. Con `passthrough` el audio también se reproduce:
+   * capturar una pestaña con tabCapture la silencia para el usuario si no se devuelve a los altavoces.
+   */
+  async attach(
+    channel: AudioChannel,
+    stream: MediaStream,
+    opts: { passthrough?: boolean } = {},
+  ): Promise<void> {
     this.detach(channel);
     const ctx = await this.context();
     const audioOnly = new MediaStream(stream.getAudioTracks());
@@ -65,10 +79,25 @@ export class AudioCapture {
     };
     source.connect(node);
     this.channels[channel] = { stream, source, node };
+    if (opts.passthrough) {
+      this.playbackCtx ??= new AudioContext();
+      const playSource = this.playbackCtx.createMediaStreamSource(audioOnly);
+      playSource.connect(this.playbackCtx.destination);
+      this.playbackNodes[channel] = playSource;
+    }
+    stream.getAudioTracks()[0]?.addEventListener('ended', () => {
+      if (channel === 'them') this.handlers.onTabEnded();
+    });
   }
 
   private detach(channel: AudioChannel): void {
     const c = this.channels[channel];
+    try {
+      this.playbackNodes[channel]?.disconnect();
+    } catch {
+      /* ya desconectado */
+    }
+    delete this.playbackNodes[channel];
     if (!c) return;
     try {
       c.source.disconnect();
@@ -100,8 +129,24 @@ export class AudioCapture {
     }
     this.videoTrack = stream.getVideoTracks()[0] ?? null;
     this.videoTrack?.addEventListener('ended', () => this.handlers.onTabEnded());
-    stream.getAudioTracks()[0]?.addEventListener('ended', () => this.handlers.onTabEnded());
     await this.attach('them', stream);
+  }
+
+  /**
+   * Audio de una pestaña a partir de un stream id de chrome.tabCapture (solo extensiones).
+   * El id lo emite el service worker tras una invocación del usuario (atajo o menú contextual).
+   */
+  async startTabFromStreamId(streamId: string): Promise<void> {
+    const constraints = {
+      audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } },
+      video: false,
+    } as unknown as MediaStreamConstraints;
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (!stream.getAudioTracks().length) {
+      for (const t of stream.getTracks()) t.stop();
+      throw new NoAudioTrackError();
+    }
+    await this.attach('them', stream, { passthrough: true });
   }
 
   /** Micrófono del usuario (canal "me"). */
@@ -120,6 +165,11 @@ export class AudioCapture {
   /** Reinicia la captura de pestaña sin cortar la sesión. */
   async changeTab(): Promise<void> {
     await this.startTab();
+  }
+
+  stopChannel(channel: AudioChannel): void {
+    this.detach(channel);
+    if (channel === 'them') this.videoTrack = null;
   }
 
   get hasTab(): boolean {
@@ -151,7 +201,9 @@ export class AudioCapture {
     this.detach('me');
     this.videoTrack = null;
     void this.ctx?.close();
+    void this.playbackCtx?.close();
     this.ctx = null;
+    this.playbackCtx = null;
     this.workletLoaded = false;
   }
 }

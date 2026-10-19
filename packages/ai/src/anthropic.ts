@@ -38,7 +38,20 @@ export class AnthropicProvider implements LlmProvider {
       max_tokens: req.maxTokens,
       // El system prompt es estable durante toda la sesión: se cachea para abaratar cada respuesta.
       system: [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }],
-      messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: req.messages.map((m) => ({
+        role: m.role,
+        content:
+          typeof m.content === 'string'
+            ? m.content
+            : m.content.map((part) =>
+                part.type === 'text'
+                  ? ({ type: 'text', text: part.text } as const)
+                  : ({
+                      type: 'image',
+                      source: { type: 'base64', media_type: part.mediaType, data: part.data },
+                    } as const),
+              ),
+      })),
     };
     if (req.temperature != null && !supportsEffort(req.model)) params.temperature = req.temperature;
     if (req.effort && supportsEffort(req.model)) params.output_config = { effort: req.effort };

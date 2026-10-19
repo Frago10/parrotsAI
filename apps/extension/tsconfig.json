@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "ES2023"],
+    "types": ["chrome", "node"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*.ts", "e2e/**/*.ts", "build.mjs"]
+}

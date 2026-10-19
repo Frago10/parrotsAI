@@ -9,6 +9,7 @@ import {
   parseClientMessage,
   type AudioChannel,
   type ClientMessage,
+  type ScreenAnalyze,
   type ServerMessage,
   type SessionContext,
   type SessionLogEvent,
@@ -210,6 +211,9 @@ export class LiveSession {
           .update({ where: { id: msg.messageId }, data: { feedback: msg.value } })
           .catch(() => undefined);
         return;
+      case 'screen.analyze':
+        await this.screenAnalyze(msg);
+        return;
       case 'debug.transcript':
         this.ingest(
           msg.channel,
@@ -344,7 +348,7 @@ export class LiveSession {
       },
       onDelta: (job, delta) => this.send({ type: 'answer.delta', messageId: job.messageId, delta }),
       onDone: (job, r) => {
-        if (r.content.trim()) {
+        if (r.content.trim() && job.kind !== 'SCREENSHOT') {
           this.previousAnswers.push(r.content);
           if (this.previousAnswers.length > 5) this.previousAnswers.shift();
         }
@@ -391,7 +395,7 @@ export class LiveSession {
     if (this.llm.notice)
       this.send({ type: 'error', code: 'llm_notice', message: this.llm.notice, fatal: false });
     this.sendState();
-    await Promise.all([this.openStream('them'), this.openStream('me')]);
+    // Las conexiones STT se abren al llegar el primer frame de audio de cada canal.
     this.tick = setInterval(() => this.onTick(), 1000);
   }
 
@@ -438,9 +442,23 @@ export class LiveSession {
   }
 
   // ---------- STT ----------
-  private async openStream(channel: AudioChannel): Promise<SttStream | null> {
+  private opening: Partial<Record<AudioChannel, Promise<SttStream | null>>> = {};
+
+  private openStream(channel: AudioChannel): Promise<SttStream | null> {
+    if (!this.session || this.ended) return Promise.resolve(null);
+    const existing = this.streams[channel];
+    if (existing) return Promise.resolve(existing);
+    const pending = this.opening[channel];
+    if (pending) return pending;
+    const p = this.doOpenStream(channel).finally(() => {
+      delete this.opening[channel];
+    });
+    this.opening[channel] = p;
+    return p;
+  }
+
+  private async doOpenStream(channel: AudioChannel): Promise<SttStream | null> {
     if (!this.session || this.ended) return null;
-    if (this.streams[channel]) return this.streams[channel]!;
     const offset = this.elapsedMs();
     this.streamOffsetMs[channel] = offset;
     try {
@@ -606,6 +624,83 @@ export class LiveSession {
     void this.answerer.run(job);
   }
 
+  /** Muestra y guarda el mensaje del usuario (chat o petición sobre la pantalla). */
+  private async echoUserMessage(text: string): Promise<void> {
+    if (!this.session) return;
+    const userMsgId = randomUUID();
+    const createdAt = new Date();
+    this.send({
+      type: 'chat.user',
+      messageId: userMsgId,
+      text,
+      createdAt: createdAt.toISOString(),
+    });
+    await this.deps.prisma?.aiMessage
+      .create({
+        data: {
+          id: userMsgId,
+          sessionId: this.session.id,
+          kind: 'CHAT_USER',
+          content: text,
+          model: '',
+          sessionMs: this.elapsedMs(),
+          createdAt,
+        },
+      })
+      .catch((err) => this.deps.logger.error({ err }, 'no se pudo guardar el mensaje'));
+  }
+
+  /**
+   * Lector de pantalla: recibe una captura y/o el texto de la página que el usuario está viendo
+   * y genera una respuesta con el modelo de la sesión (más la transcripción reciente de la llamada).
+   */
+  private async screenAnalyze(msg: ScreenAnalyze): Promise<void> {
+    if (!this.session || !this.answerer) return;
+    // La auto-lectura nunca interrumpe una respuesta en curso.
+    if (msg.trigger === 'auto' && this.answerer.busy) return;
+    const page = msg.page ?? null;
+    const prompt = msg.prompt?.trim() || null;
+    const host = (() => {
+      try {
+        return page ? new URL(page.url).host : '';
+      } catch {
+        return page?.url ?? '';
+      }
+    })();
+    const messageId = randomUUID();
+    this.logEv({
+      ev: 'screen.context',
+      messageId,
+      trigger: msg.trigger,
+      url: page?.url ?? '',
+      title: page?.title ?? '',
+      viewportChars: page?.viewportText.length ?? 0,
+      fullChars: page?.fullText?.length ?? 0,
+      hasImage: Boolean(msg.imageBase64),
+      imageKb: msg.imageBase64 ? Math.round((msg.imageBase64.length * 3) / 4 / 1024) : 0,
+      prompt,
+    });
+    this.logEv({ ev: 'user.action', action: 'screenshot', detail: msg.trigger });
+    if (prompt && msg.trigger !== 'auto') await this.echoUserMessage(prompt);
+    const now = this.elapsedMs();
+    const job: AnswerJob = {
+      messageId,
+      kind: 'SCREENSHOT',
+      question: page ? `${page.title || host}${host ? ` (${host})` : ''}` : 'Pantalla',
+      qtype: null,
+      recentTranscript: this.window.formatRecent(now, 90_000),
+      previousAnswers: [],
+      userInstruction: prompt,
+      screen: {
+        page,
+        prompt,
+        imageBase64: msg.imageBase64 ?? null,
+        imageMediaType: msg.imageMediaType,
+      },
+    };
+    void this.answerer.run(job);
+  }
+
   private async chat(text: string): Promise<void> {
     if (!this.session) return;
     const userMsgId = randomUUID();
@@ -683,8 +778,8 @@ export class LiveSession {
       data: { language },
     });
     // Cambio en caliente: se reabren las conexiones STT con el nuevo idioma.
+    // Se cierran y reabren solas con el siguiente frame de audio, ya con el idioma nuevo.
     await this.closeStreams();
-    await Promise.all([this.openStream('them'), this.openStream('me')]);
     this.sendState();
   }
 

@@ -8,7 +8,28 @@ loadEnv({ path: path.resolve(process.cwd(), '.env'), quiet: true });
 
 export type SttProviderId = 'deepgram' | 'assemblyai' | 'fake';
 
+/**
+ * Orígenes que pueden hablar con el servidor desde un navegador: la web local, la extensión de
+ * Chrome y los configurados en ALLOWED_ORIGINS. Una página cualquiera (evil.com) queda fuera.
+ * Los clientes sin cabecera Origin (curl, tests, otros procesos) se aceptan.
+ */
+export function isAllowedOrigin(origin: string | undefined, extra: string[] = []): boolean {
+  if (!origin) return true;
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (url.protocol === 'chrome-extension:') return true;
+  if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) return true;
+  return extra.some((rule) =>
+    rule.startsWith('*.') ? url.hostname.endsWith(rule.slice(1)) : rule === origin,
+  );
+}
+
 export interface RealtimeConfig {
+  allowedOrigins: string[];
   port: number;
   host: string;
   sttProvider: SttProviderId;
@@ -32,6 +53,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RealtimeConfig
   const sttProvider: SttProviderId =
     stt === 'deepgram' && !env.DEEPGRAM_API_KEY ? 'fake' : stt === 'assemblyai' ? 'fake' : stt;
   return {
+    allowedOrigins: (env.ALLOWED_ORIGINS ?? '')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
     port: Number(env.REALTIME_PORT ?? 4001),
     host: env.REALTIME_HOST ?? '0.0.0.0',
     sttProvider,

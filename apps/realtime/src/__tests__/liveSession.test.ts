@@ -160,3 +160,59 @@ describe('LiveSession (proveedores simulados)', () => {
     expect(sent[0]).toMatchObject({ type: 'error', code: 'not_joined' });
   });
 });
+
+describe('LiveSession: lector de pantalla', () => {
+  const page = {
+    url: 'https://ejemplo.com/quiz/3',
+    title: 'Quiz de SQL',
+    viewportText:
+      'Quiz de SQL\n¿Cuál es la diferencia entre INNER JOIN y LEFT JOIN?\nA) Ninguna\nB) LEFT JOIN conserva filas sin pareja',
+    inputs: [{ label: 'Respuesta', type: 'radio', value: '' }],
+  };
+
+  it('analiza texto + captura y responde sin necesitar audio', async () => {
+    const { session, sent, log } = setup();
+    await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
+    await session.handleText(
+      JSON.stringify({
+        type: 'screen.analyze',
+        prompt: 'Responde la pregunta',
+        imageBase64: 'AAAA',
+        page,
+        trigger: 'manual',
+      }),
+    );
+    await waitFor(() => sent.some((m) => m.type === 'answer.done'));
+    const start = sent.find((m) => m.type === 'answer.start');
+    expect(start).toMatchObject({ kind: 'SCREENSHOT' });
+    // El mensaje del usuario se muestra en el panel.
+    expect(sent.some((m) => m.type === 'chat.user' && m.text === 'Responde la pregunta')).toBe(
+      true,
+    );
+    const done = sent.find((m) => m.type === 'answer.done');
+    expect(done && done.type === 'answer.done' && done.content).toContain('Quiz de SQL');
+    expect(done && done.type === 'answer.done' && done.content).toContain('captura: sí');
+    const ctx = log.events.find((e) => e.ev === 'screen.context');
+    expect(ctx).toMatchObject({ trigger: 'manual', hasImage: true, title: 'Quiz de SQL' });
+    await session.handleText(JSON.stringify({ type: 'session.end' }));
+  });
+
+  it('la auto-lectura no interrumpe una respuesta en curso ni muestra mensaje de usuario', async () => {
+    const { session, sent } = setup();
+    await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
+    await session.handleText(JSON.stringify({ type: 'screen.analyze', page, trigger: 'auto' }));
+    await waitFor(() => sent.some((m) => m.type === 'answer.done'));
+    expect(sent.some((m) => m.type === 'chat.user')).toBe(false);
+    const done = sent.find((m) => m.type === 'answer.done');
+    expect(done && done.type === 'answer.done' && done.content).toContain('captura: no');
+    await session.handleText(JSON.stringify({ type: 'session.end' }));
+  });
+
+  it('rechaza un screen.analyze con contexto inválido', async () => {
+    const { session, sent } = setup();
+    await session.handleText(JSON.stringify({ type: 'session.join', sessionId: 'test-session' }));
+    await session.handleText(JSON.stringify({ type: 'screen.analyze', page: { url: 5 } }));
+    expect(sent.some((m) => m.type === 'error' && m.code === 'bad_message')).toBe(true);
+    await session.handleText(JSON.stringify({ type: 'session.end' }));
+  });
+});
