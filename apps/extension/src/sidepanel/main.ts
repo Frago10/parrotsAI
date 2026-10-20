@@ -35,6 +35,7 @@ const store = new LiveStore();
 let settings: Settings = DEFAULT_SETTINGS;
 let serverConfig: ServerConfig | null = null;
 let serverOk = false;
+let dbProblem = false;
 let sessions: SessionSummary[] = [];
 let capture: AudioCapture | null = null;
 let listeningTab = false;
@@ -60,13 +61,27 @@ function notify(message: string, kind: 'info' | 'err' = 'info', ttlMs = 8000): v
 }
 
 // ---------- Servidor y sesión ----------
+/** Mensaje para cada fallo: servidor apagado y base de datos caída son problemas distintos. */
+function serverProblem(): string | null {
+  if (!serverOk) {
+    return `No hay conexión con el servidor (${settings.serverUrl}). Arráncalo con "pnpm dev" desde la carpeta del proyecto, o cambia la URL en ⚙.`;
+  }
+  if (dbProblem) {
+    return 'El servidor responde, pero no puede usar la base de datos. Revisa que Postgres esté corriendo, que DATABASE_URL del archivo .env sea correcta y que hayas ejecutado "pnpm db:migrate".';
+  }
+  return null;
+}
+
 async function refreshServer(): Promise<void> {
+  serverOk = false;
+  dbProblem = false;
   try {
     serverConfig = await getConfig(settings.serverUrl);
-    sessions = await listSessions(settings.serverUrl);
     serverOk = true;
+    sessions = await listSessions(settings.serverUrl);
   } catch {
-    serverOk = false;
+    // Si la configuración llegó, el servidor está vivo y lo que falla es la base de datos.
+    dbProblem = serverOk;
   }
   fillModelSelect();
   fillSessionSelect();
@@ -102,12 +117,9 @@ async function setSession(s: SessionSummary): Promise<void> {
 
 /** Garantiza una sesión conectada y en vivo (crea una sesión rápida si no hay). */
 async function ensureSession(): Promise<void> {
-  if (!serverOk) await refreshServer();
-  if (!serverOk) {
-    throw new Error(
-      `No hay conexión con el servidor (${settings.serverUrl}). ¿Está corriendo "pnpm dev"?`,
-    );
-  }
+  if (!serverOk || dbProblem) await refreshServer();
+  const problem = serverProblem();
+  if (problem) throw new Error(problem);
   if (!settings.sessionId) {
     const tab = await getTargetTab();
     const host = hostOf(tab?.url);
@@ -749,21 +761,18 @@ async function boot(): Promise<void> {
   renderButtons();
   renderReading();
   await refreshServer();
-  if (!serverOk) {
-    notify(
-      `No hay conexión con el servidor (${settings.serverUrl}). Arráncalo con "pnpm dev" o cambia la URL en ⚙.`,
-      'err',
-      0,
-    );
+  const problem = serverProblem();
+  if (problem) {
+    notify(problem, 'err', 0);
     const retry = setInterval(async () => {
       await refreshServer();
-      if (serverOk) {
+      if (!serverProblem()) {
         clearInterval(retry);
-        notify('Servidor conectado.', 'info', 3000);
+        notify('Servidor listo.', 'info', 3000);
       }
     }, 5000);
   }
-  if (settings.sessionId && serverOk)
+  if (settings.sessionId && serverOk && !dbProblem)
     store.connect(wsUrlFrom(settings.serverUrl), settings.sessionId);
   // El reloj del encabezado se refresca aunque no lleguen mensajes.
   setInterval(() => renderDebug(store.state), 1000);

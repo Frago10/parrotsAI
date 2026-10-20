@@ -43,11 +43,17 @@ export async function buildServer() {
     },
   });
 
-  app.get('/health', async () => ({
-    ok: true,
-    stt: stt.id,
-    llmProvider: process.env.LLM_PROVIDER ?? 'auto',
-  }));
+  // El servidor puede estar vivo con la base de datos caída: /health lo distingue.
+  app.get('/health', async () => {
+    let db: { ok: boolean; error?: string };
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      db = { ok: true };
+    } catch (err) {
+      db = { ok: false, error: err instanceof Error ? err.message.split('\n')[0] : String(err) };
+    }
+    return { ok: true, stt: stt.id, llmProvider: process.env.LLM_PROVIDER ?? 'auto', db };
+  });
 
   // Configuración que necesita la extensión: modelos disponibles y proveedores activos.
   app.get('/api/config', async () => {

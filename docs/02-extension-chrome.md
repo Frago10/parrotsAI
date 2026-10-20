@@ -89,6 +89,7 @@ Estimación, no medida: una lectura con captura (imagen de ~1.500 tokens + 2.000
 
 ## Problemas frecuentes
 
+- **"El servidor responde, pero no puede usar la base de datos"**: Postgres no está corriendo o `DATABASE_URL` en `.env` es incorrecta. Arranca Postgres, ejecuta `pnpm db:migrate` y reabre el panel. `http://localhost:4001/health` muestra el error exacto en el campo `db`.
 - **Punto rojo / "No hay conexión con el servidor"**: arranca `pnpm dev` o corrige la URL en ⚙ (por defecto `http://localhost:4001`).
 - **"Chrome no deja leer esta página"**: es una página interna o protegida; abre una web normal.
 - **No capturó la imagen**: la pestaña no estaba visible. Se usa solo el texto y se avisa.
